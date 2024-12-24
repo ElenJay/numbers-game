@@ -1,8 +1,8 @@
 use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
 
-pub const WINDOW_WIDTH: i32 = 1280;
-pub const WINDOW_HEIGHT: i32 = 720;
+const WINDOW_WIDTH: i32 = 1600;
+const WINDOW_HEIGHT: i32 = 900;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
@@ -19,14 +19,18 @@ pub enum GameState {
 pub struct Game {
     mode: GameMode,
     state: GameState,
+    window_width: i32,
+    window_height: i32,
     is_vsync_enabled: bool,
 }
 
 impl Game {
-    pub fn new() -> Game {
-        Game {
+    pub fn new() -> Self {
+        Self {
             mode: GameMode::Debug,
             state: GameState::Menu,
+            window_width: WINDOW_WIDTH,
+            window_height: WINDOW_HEIGHT,
             is_vsync_enabled: false,
         }
     }
@@ -56,5 +60,21 @@ impl Game {
 
     pub fn toggle_vsync_enabled(&mut self) {
         self.is_vsync_enabled = !self.is_vsync_enabled;
+    }
+
+    pub fn get_window_width(&self) -> i32 {
+        self.window_width
+    }
+
+    pub fn set_window_width(&mut self, width: i32) {
+        self.window_width = width;
+    }
+
+    pub fn get_window_height(&self) -> i32 {
+        self.window_height
+    }
+
+    pub fn set_window_height(&mut self, height: i32) {
+        self.window_height = height;
     }
 }

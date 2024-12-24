@@ -7,8 +7,9 @@ pub fn draw_text_center(
     text: &str,
     y: i32,
     font_size: i32,
-    color: Color
+    color: Color,
+    game: &game::Game
 ) {
     let text_length = d.measure_text(text, font_size);
-    d.draw_text(text, (game::WINDOW_WIDTH - text_length) / 2, y, font_size, color);
+    d.draw_text(text, (game.get_window_width() - text_length) / 2, y, font_size, color);
 }

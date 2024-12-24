@@ -11,9 +11,9 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new() -> Player {
-        Player {
-            position: Vector2::new(game::WINDOW_WIDTH as f32 / 2.0, game::WINDOW_HEIGHT as f32 / 2.0),
+    pub fn new(game: &game::Game) -> Self {
+        Self {
+            position: Vector2::new(game.get_window_width() as f32 / 2.0, game.get_window_height() as f32 / 2.0),
             speed: 60.0,
             radius: 30.0,
             color: Color::RED
