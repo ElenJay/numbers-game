@@ -32,7 +32,7 @@ fn main() {
             menu.update_btn_positions(&game);
         }
         game.process_game_controller(&mut rl);
-        menu.process_menu_controller(&mut rl, &mut game);
+        menu.process_menu_controller(&mut rl, &mut game, &mut player);
         player.process_player_controller(&rl, &game);
 
         let mut d = rl.begin_drawing(&thread);
@@ -41,7 +41,7 @@ fn main() {
         if game.get_mode() == game::GameMode::Debug {
             d.draw_fps( 10, 10);
         }
-        let welcome_text = format!("The highest score is {0} points.", player.get_score());
+        let welcome_text = format!("Your score is {0} points.", player.get_score());
         utils::draw_text_center(&mut d, welcome_text.as_str(), 12, 36, Color::GREEN, &game);
 
         menu.draw_menu(&mut d, &game);

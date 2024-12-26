@@ -46,6 +46,14 @@ impl Player {
     pub fn get_score(&self) -> i32 {
         self.score
     }
+
+    pub fn restart(&mut self) {
+        self.numbers = utils::generate_numbers_array(H_COUNT * V_COUNT);
+        self.active_btn_index = -1;
+        self.incorrect_btn_index = -1;
+        self.correct_buttons.clear();
+        self.score = 0;
+    }
     
     pub fn process_player_controller(&mut self, rl: &RaylibHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
@@ -66,6 +74,7 @@ impl Player {
                         if self.numbers[i] == self.correct_buttons.len() as i32 + 1 {
                             self.correct_buttons.push(index);
                             self.incorrect_btn_index = -1;
+                            self.score += 1;
                         } else {
                             self.incorrect_btn_index = index;
                         }

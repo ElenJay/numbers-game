@@ -2,8 +2,10 @@ use raylib::prelude::*;
 use raylib::consts::MouseButton::*;
 
 use crate::game;
+use crate::player;
 
 const BTN_START_TEXT: &str = "Start";
+const BTN_LOAD_TEXT: &str = "Load";
 const BTN_SETTINGS_TEXT: &str = "Settings";
 const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
@@ -12,7 +14,7 @@ const BTN_BACK_TEXT: &str = "Back";
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum MenuState {
-    None,
+    // None,
     Primary,
     Settings,
 }
@@ -21,14 +23,14 @@ pub struct Menu {
     state: MenuState,
     btn_start: Rectangle,
     btn_start_color: Color,
+    btn_load: Rectangle,
+    btn_load_color: Color,
     btn_settings: Rectangle,
     btn_settings_color: Color,
     btn_exit: Rectangle,
     btn_exit_color: Color,
     btn_fullscreen: Rectangle,
     btn_fullscreen_color: Color,
-    btn_vsync: Rectangle,
-    btn_vsync_color: Color,
     btn_back: Rectangle,
     btn_back_color: Color,
 }
@@ -39,42 +41,42 @@ impl Menu {
             state: MenuState::Primary,
             btn_start: Rectangle::new(
                 (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32 - 320.0) / 2.0, 
+                (game.get_window_height() as f32) / 2.0 - 220.0, 
                 400.0, 
                 80.0,
             ),
             btn_start_color: Color::LIGHTGRAY,
+            btn_load: Rectangle::new(
+                (game.get_window_width() as f32 - 400.0) / 2.0, 
+                (game.get_window_height() as f32) / 2.0 - 100.0, 
+                400.0, 
+                80.0,
+            ),
+            btn_load_color: Color::LIGHTGRAY,
             btn_settings: Rectangle::new(
                 (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32 - 80.0) / 2.0, 
+                (game.get_window_height() as f32) / 2.0 + 20.0, 
                 400.0, 
                 80.0
             ),
             btn_settings_color: Color::LIGHTGRAY,
             btn_exit: Rectangle::new(
                 (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32 + 160.0) / 2.0, 
+                (game.get_window_height() as f32) / 2.0 + 140.0, 
                 400.0, 
                 80.0
             ),
             btn_exit_color: Color::LIGHTGRAY,
             btn_fullscreen: Rectangle::new(
                 (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32 - 320.0) / 2.0, 
+                (game.get_window_height() as f32) / 2.0 - 100.0, 
                 400.0, 
                 80.0
             ),
             btn_fullscreen_color: Color::LIGHTGRAY,
-            btn_vsync: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32 - 80.0) / 2.0, 
-                400.0, 
-                80.0
-            ),
-            btn_vsync_color: Color::LIGHTGRAY,
             btn_back: Rectangle::new(
                 (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32 + 160.0) / 2.0, 
+                (game.get_window_height() as f32) / 2.0 + 20.0, 
                 400.0, 
                 80.0
             ),
@@ -82,7 +84,7 @@ impl Menu {
         }
     }
 
-    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game) {
+    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, player: &mut player::Player) {
         if game.get_state() == game::GameState::Menu {
             let mouse_pos = rl.get_mouse_position();
 
@@ -91,9 +93,19 @@ impl Menu {
                     self.btn_start_color = Color::LIGHTGREEN;
                     if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                         game.set_state(game::GameState::Game);
+                        player.restart();
                     }
                 } else {
                     self.btn_start_color = Color::LIGHTGRAY;
+                }
+
+                if self.btn_load.check_collision_point_rec(mouse_pos) {
+                    self.btn_load_color = Color::LIGHTGREEN;
+                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                        game.set_state(game::GameState::Game);
+                    }
+                } else {
+                    self.btn_load_color = Color::LIGHTGRAY;
                 }
 
                 if self.btn_settings.check_collision_point_rec(mouse_pos) {
@@ -124,18 +136,6 @@ impl Menu {
                     self.btn_fullscreen_color = Color::LIGHTGRAY;
                 }
 
-                if self.btn_vsync.check_collision_point_rec(mouse_pos) {
-                    self.btn_vsync_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        game.toggle_vsync_enabled();
-                        // // ToDo: cannot turn-off VSync mode! Need to research and fix
-                        // // ToDo: fix bug with resetting other flags (fullscreen mode will be turned off)
-                        rl.set_window_state(rl.get_window_state().set_vsync_hint(game.get_vsync_enabled()));
-                    }
-                } else {
-                    self.btn_vsync_color = Color::LIGHTGRAY;
-                }
-
                 if self.btn_back.check_collision_point_rec(mouse_pos) {
                     self.btn_back_color = Color::LIGHTGREEN;
                     if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
@@ -145,8 +145,6 @@ impl Menu {
                     self.btn_back_color = Color::LIGHTGRAY;
                 }
             }
-        } else {
-            self.state = MenuState::None;
         }
     }
 
@@ -154,11 +152,11 @@ impl Menu {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 self.draw_menu_button(d, &self.btn_start, BTN_START_TEXT, &self.btn_start_color);
+                self.draw_menu_button(d, &self.btn_load, BTN_LOAD_TEXT, &self.btn_load_color);
                 self.draw_menu_button(d, &self.btn_settings, BTN_SETTINGS_TEXT, &self.btn_settings_color);
                 self.draw_menu_button(d, &self.btn_exit, BTN_EXIT_TEXT, &self.btn_exit_color);
             } else if self.state == MenuState::Settings {
                 self.draw_menu_button(d, &self.btn_fullscreen, BTN_FULLSCREEN_TEXT, &self.btn_fullscreen_color);
-                self.draw_menu_button(d, &self.btn_vsync, BTN_VSYNC_TEXT, &self.btn_vsync_color);
                 self.draw_menu_button(d, &self.btn_back, BTN_BACK_TEXT, &self.btn_back_color);
             }
         }
@@ -175,18 +173,21 @@ impl Menu {
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {
         self.btn_start.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_start.y = (game.get_window_height() as f32 - 320.0) / 2.0;
+        self.btn_start.y = (game.get_window_height() as f32) / 2.0 - 220.0;
+
+        self.btn_load.x = (game.get_window_width() as f32 - 400.0) / 2.0;
+        self.btn_load.y = (game.get_window_height() as f32) / 2.0 - 100.0;
 
         self.btn_settings.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_settings.y = (game.get_window_height() as f32 - 80.0) / 2.0;
+        self.btn_settings.y = (game.get_window_height() as f32) / 2.0 + 20.0;
 
         self.btn_exit.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_exit.y = (game.get_window_height() as f32 + 160.0) / 2.0;
+        self.btn_exit.y = (game.get_window_height() as f32) / 2.0 + 140.0;
 
         self.btn_fullscreen.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_fullscreen.y = (game.get_window_height() as f32 - 240.0) / 2.0;
+        self.btn_fullscreen.y = (game.get_window_height() as f32) / 2.0 - 100.0;
 
         self.btn_back.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_back.y = (game.get_window_height() as f32) / 2.0;
+        self.btn_back.y = (game.get_window_height() as f32) / 2.0 + 20.0;
     }
 }

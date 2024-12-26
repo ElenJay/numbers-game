@@ -35,10 +35,14 @@ impl Game {
         }
     }
 
-    pub fn process_game_controller(&self, rl: &mut RaylibHandle) {
-        // Base hotkeys
+    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle) {
+        rl.set_exit_key(None);
+
         if rl.is_key_released(KEY_F1) {
             rl.toggle_fullscreen();
+        }
+        if self.state == GameState::Game && rl.is_key_released(KEY_ESCAPE) {
+            self.state = GameState::Menu;
         }
     }
 
