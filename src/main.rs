@@ -15,6 +15,7 @@ fn main() {
         .size(game.get_window_width(), game.get_window_height())
         .title("Numbers Game")
         .resizable()
+        .vsync()
         .build();
 
     if env::consts::OS != "macos" {
@@ -22,7 +23,7 @@ fn main() {
         rl.set_window_icon(Image::load_image("assets/icon.png").unwrap());
     }
     let mut menu = menu::Menu::new(&game);
-    let mut player = player::Player::new(&game);
+    let mut player = player::Player::new();
 
     while !rl.window_should_close() {
         if rl.is_window_resized() {
@@ -40,8 +41,8 @@ fn main() {
         if game.get_mode() == game::GameMode::Debug {
             d.draw_fps( 10, 10);
         }
-        let welcome_text = format!("The highest score is {0} points.", 410);
-        utils::draw_text_center(&mut d, welcome_text.as_str(), 12, 20, Color::GREEN, &game);
+        let welcome_text = format!("The highest score is {0} points.", player.get_score());
+        utils::draw_text_center(&mut d, welcome_text.as_str(), 12, 36, Color::GREEN, &game);
 
         menu.draw_menu(&mut d, &game);
         player.draw(&mut d, &game);

@@ -153,47 +153,24 @@ impl Menu {
     pub fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
-                d.draw_rectangle_rec(self.btn_start, self.btn_start_color);
-                d.draw_rectangle_rec(self.btn_settings, self.btn_settings_color);
-                d.draw_rectangle_rec(self.btn_exit, self.btn_exit_color);
-
-                let btn_start_game_padding = Vector2::new(
-                    self.btn_start.x + (self.btn_start.width - d.measure_text(BTN_START_TEXT, 64) as f32) / 2.0, 
-                    self.btn_start.y + (self.btn_start.height - 64.0) / 2.0
-                );
-                let btn_settings_game_padding = Vector2::new(
-                    self.btn_settings.x + (self.btn_settings.width - d.measure_text(BTN_SETTINGS_TEXT, 64) as f32) / 2.0, 
-                    self.btn_settings.y + (self.btn_settings.height - 64.0) / 2.0
-                );
-                let btn_exit_game_padding = Vector2::new(
-                    self.btn_exit.x + (self.btn_exit.width - d.measure_text(BTN_EXIT_TEXT, 64) as f32) / 2.0, 
-                    self.btn_exit.y + (self.btn_exit.height - 64.0) / 2.0
-                );
-                d.draw_text(BTN_START_TEXT, btn_start_game_padding.x as i32, btn_start_game_padding.y as i32, 64, Color::BLACK);
-                d.draw_text(BTN_SETTINGS_TEXT, btn_settings_game_padding.x as i32, btn_settings_game_padding.y as i32, 64, Color::BLACK);
-                d.draw_text(BTN_EXIT_TEXT, btn_exit_game_padding.x as i32, btn_exit_game_padding.y as i32, 64, Color::BLACK);
+                self.draw_menu_button(d, &self.btn_start, BTN_START_TEXT, &self.btn_start_color);
+                self.draw_menu_button(d, &self.btn_settings, BTN_SETTINGS_TEXT, &self.btn_settings_color);
+                self.draw_menu_button(d, &self.btn_exit, BTN_EXIT_TEXT, &self.btn_exit_color);
             } else if self.state == MenuState::Settings {
-                d.draw_rectangle_rec(self.btn_fullscreen, self.btn_fullscreen_color);
-                d.draw_rectangle_rec(self.btn_vsync, self.btn_vsync_color);
-                d.draw_rectangle_rec(self.btn_back, self.btn_back_color);
-
-                let btn_fullscreen_padding = Vector2::new(
-                    self.btn_fullscreen.x + (self.btn_fullscreen.width - d.measure_text(BTN_FULLSCREEN_TEXT, 64) as f32) / 2.0, 
-                    self.btn_fullscreen.y + (self.btn_fullscreen.height - 64.0) / 2.0
-                );
-                let btn_vsync_padding = Vector2::new(
-                    self.btn_vsync.x + (self.btn_vsync.width - d.measure_text(BTN_VSYNC_TEXT, 64) as f32) / 2.0, 
-                    self.btn_vsync.y + (self.btn_vsync.height - 64.0) / 2.0
-                );
-                let btn_back_padding = Vector2::new(
-                    self.btn_back.x + (self.btn_back.width - d.measure_text(BTN_BACK_TEXT, 64) as f32) / 2.0, 
-                    self.btn_back.y + (self.btn_back.height - 64.0) / 2.0
-                );
-                d.draw_text(BTN_FULLSCREEN_TEXT, btn_fullscreen_padding.x as i32, btn_fullscreen_padding.y as i32, 64, Color::BLACK);
-                d.draw_text(BTN_VSYNC_TEXT, btn_vsync_padding.x as i32, btn_vsync_padding.y as i32, 64, Color::BLACK);
-                d.draw_text(BTN_BACK_TEXT, btn_back_padding.x as i32, btn_back_padding.y as i32, 64, Color::BLACK);
+                self.draw_menu_button(d, &self.btn_fullscreen, BTN_FULLSCREEN_TEXT, &self.btn_fullscreen_color);
+                self.draw_menu_button(d, &self.btn_vsync, BTN_VSYNC_TEXT, &self.btn_vsync_color);
+                self.draw_menu_button(d, &self.btn_back, BTN_BACK_TEXT, &self.btn_back_color);
             }
         }
+    }
+
+    pub fn draw_menu_button(&self, d: &mut RaylibDrawHandle, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
+        d.draw_rectangle_rec(btn, btn_color);
+        let btn_padding = Vector2::new(
+            btn.x + (btn.width - d.measure_text(btn_text, 64) as f32) / 2.0, 
+            btn.y + (btn.height - 64.0) / 2.0
+        );
+        d.draw_text(btn_text, btn_padding.x as i32, btn_padding.y as i32, 64, Color::BLACK);
     }
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {
