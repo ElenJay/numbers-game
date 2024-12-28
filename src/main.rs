@@ -6,6 +6,7 @@ mod game;
 mod menu;
 mod player;
 mod utils;
+mod timer;
 
 fn main() {
     let mut game = game::Game::new();
@@ -24,6 +25,7 @@ fn main() {
     }
     let mut menu = menu::Menu::new(&game);
     let mut player = player::Player::new();
+    let mut timer = timer::Timer::new(2 * 60);
 
     while !rl.window_should_close() {
         if rl.is_window_resized() {
@@ -32,7 +34,7 @@ fn main() {
             menu.update_btn_positions(&game);
         }
         game.process_game_controller(&mut rl);
-        menu.process_menu_controller(&mut rl, &mut game, &mut player);
+        menu.process_menu_controller(&mut rl, &mut game, &mut player, &mut timer);
         player.process_player_controller(&rl, &game);
 
         let mut d = rl.begin_drawing(&thread);
@@ -45,6 +47,9 @@ fn main() {
         utils::draw_text_center(&mut d, welcome_text.as_str(), 12, 36, Color::GREEN, &game);
 
         menu.draw_menu(&mut d, &game);
+        if game.get_state() == game::GameState::Game {
+            timer.draw(&mut d, &game);
+        }
         player.draw(&mut d, &game);
     }
 }

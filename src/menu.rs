@@ -3,18 +3,17 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::player;
+use crate::timer;
 
 const BTN_START_TEXT: &str = "Start";
 const BTN_LOAD_TEXT: &str = "Load";
 const BTN_SETTINGS_TEXT: &str = "Settings";
 const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
-const BTN_VSYNC_TEXT: &str = "Vsync";
 const BTN_BACK_TEXT: &str = "Back";
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum MenuState {
-    // None,
     Primary,
     Settings,
 }
@@ -84,7 +83,7 @@ impl Menu {
         }
     }
 
-    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, player: &mut player::Player) {
+    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, player: &mut player::Player, timer: &mut timer::Timer) {
         if game.get_state() == game::GameState::Menu {
             let mouse_pos = rl.get_mouse_position();
 
@@ -93,6 +92,7 @@ impl Menu {
                     self.btn_start_color = Color::LIGHTGREEN;
                     if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                         game.set_state(game::GameState::Game);
+                        timer.start();
                         player.restart();
                     }
                 } else {

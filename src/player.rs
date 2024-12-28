@@ -23,7 +23,7 @@ pub struct Player {
 impl Player {
     pub fn new() -> Self {
         let mut obj = Self {
-            numbers: utils::generate_numbers_array(H_COUNT * V_COUNT),
+            numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
             buttons: Vec::new(),
             active_btn_index: -1,
             incorrect_btn_index: -1,
@@ -45,6 +45,10 @@ impl Player {
 
     pub fn get_score(&self) -> i32 {
         self.score
+    }
+
+    pub fn is_started(&self) -> bool {
+        self.numbers.len() > 0
     }
 
     pub fn restart(&mut self) {
@@ -94,6 +98,7 @@ impl Player {
             let mut text;
             let mut index: i32;
             let mut text_color: Color = Color::BLACK;
+
             for (i, el) in self.buttons.iter().enumerate() {
                 index = i as i32;
                 text = format!("{0}", self.numbers[i]);
