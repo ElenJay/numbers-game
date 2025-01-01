@@ -10,7 +10,6 @@ mod timer;
 
 fn main() {
     let mut game = game::Game::new();
-    println!("{0}, {1}", game.get_window_width(), game.get_window_height());
 
     let (mut rl, thread) = raylib::init()
         .size(game.get_window_width(), game.get_window_height())
@@ -25,7 +24,6 @@ fn main() {
     }
     let mut menu = menu::Menu::new(&game);
     let mut player = player::Player::new();
-    let mut timer = timer::Timer::new(2 * 60);
 
     while !rl.window_should_close() {
         if rl.is_window_resized() {
@@ -33,23 +31,19 @@ fn main() {
             game.set_window_height(rl.get_screen_height());
             menu.update_btn_positions(&game);
         }
-        game.process_game_controller(&mut rl);
-        menu.process_menu_controller(&mut rl, &mut game, &mut player, &mut timer);
-        player.process_player_controller(&rl, &game);
 
+        // Process control
+        game.process_game_controller(&mut rl);
+        menu.process_menu_controller(&mut rl, &mut game, &mut player);
+        player.process_player_controller(&rl, &mut game);
+
+        // Drawing
         let mut d = rl.begin_drawing(&thread);
         d.clear_background(Color::WHITE);
 
-        if game.get_mode() == game::GameMode::Debug {
-            d.draw_fps( 10, 10);
-        }
-        let welcome_text = format!("Your score is {0} points.", player.get_score());
-        utils::draw_text_center(&mut d, welcome_text.as_str(), 12, 36, Color::GREEN, &game);
-
+        game.draw_fps(&mut d);
         menu.draw_menu(&mut d, &game);
-        if game.get_state() == game::GameState::Game {
-            timer.draw(&mut d, &game);
-        }
+        player.draw_score(&mut d, &game);
         player.draw(&mut d, &game);
     }
 }

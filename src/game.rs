@@ -7,13 +7,15 @@ const WINDOW_HEIGHT: i32 = 900;
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
     Debug,
-    // Release,
+    Release,
 }
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameState {
     Menu,
     Game,
+    Win,
+    Lose,
 }
 
 pub struct Game {
@@ -26,21 +28,10 @@ pub struct Game {
 impl Game {
     pub fn new() -> Self {
         Self {
-            mode: GameMode::Debug,
+            mode: GameMode::Release,
             state: GameState::Menu,
             window_width: WINDOW_WIDTH,
             window_height: WINDOW_HEIGHT,
-        }
-    }
-
-    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle) {
-        rl.set_exit_key(None);
-
-        if rl.is_key_released(KEY_F1) {
-            rl.toggle_fullscreen();
-        }
-        if self.state == GameState::Game && rl.is_key_released(KEY_ESCAPE) {
-            self.state = GameState::Menu;
         }
     }
 
@@ -50,10 +41,6 @@ impl Game {
 
     pub fn set_state(&mut self, state: GameState) {
         self.state = state;
-    }
-
-    pub fn get_mode(&self) -> GameMode {
-        self.mode
     }
 
     pub fn get_window_width(&self) -> i32 {
@@ -70,5 +57,25 @@ impl Game {
 
     pub fn set_window_height(&mut self, height: i32) {
         self.window_height = height;
+    }
+
+    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle) {
+        rl.set_exit_key(None);
+
+        if rl.is_key_released(KEY_F1) {
+            rl.toggle_fullscreen();
+        }
+        if rl.is_key_released(KEY_ESCAPE) {
+            match self.state {
+                GameState::Game | GameState::Win | GameState::Lose => self.state = GameState::Menu,
+                GameState::Menu => std::process::exit(0),
+            }
+        }
+    }
+
+    pub fn draw_fps(&self, d: &mut RaylibDrawHandle) {
+        if self.mode == GameMode::Debug {
+            d.draw_fps( 10, 10);
+        }
     }
 }

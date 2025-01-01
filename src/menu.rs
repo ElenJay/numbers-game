@@ -3,7 +3,10 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::player;
-use crate::timer;
+
+const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
+const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
+const DEFAULT_MENU_ITEMS_DIFF: f32 = DEFAULT_MENU_ITEM_HEIGHT / 2.0;
 
 const BTN_START_TEXT: &str = "Start";
 const BTN_LOAD_TEXT: &str = "Load";
@@ -12,137 +15,121 @@ const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
 const BTN_BACK_TEXT: &str = "Back";
 
+// ToDo: separate menu items and implement enum iterator
+// enum MENU_ITEMS_TEXT {
+//     BTN_START_TEXT,
+//     BTN_LOAD_TEXT,
+//     BTN_SETTINGS_TEXT,
+//     BTN_EXIT_TEXT,
+// }
+
+// enum MENU_SETTINGS_ITEMS_TEXT {
+//     BTN_FULLSCREEN_TEXT,
+//     BTN_BACK_TEXT,
+// }
+
 #[derive(Clone, Copy, PartialEq)]
 pub enum MenuState {
     Primary,
     Settings,
 }
 
+pub struct MenuItem {
+    btn: Rectangle,
+    content: String,
+    color: Color,
+}
+
 pub struct Menu {
     state: MenuState,
-    btn_start: Rectangle,
-    btn_start_color: Color,
-    btn_load: Rectangle,
-    btn_load_color: Color,
-    btn_settings: Rectangle,
-    btn_settings_color: Color,
-    btn_exit: Rectangle,
-    btn_exit_color: Color,
-    btn_fullscreen: Rectangle,
-    btn_fullscreen_color: Color,
-    btn_back: Rectangle,
-    btn_back_color: Color,
+    items: Vec<MenuItem>,
+    settings_items: Vec<MenuItem>,
 }
 
 impl Menu {
+    fn construct_menu_items(titles: Vec<String>, window_width: f32, window_height: f32) -> Vec<MenuItem> {
+        let mut items: Vec<MenuItem> = Vec::with_capacity(titles.len());
+        let all_items_height: f32 = titles.len() as f32 * DEFAULT_MENU_ITEM_HEIGHT + (titles.len() - 1) as f32 * DEFAULT_MENU_ITEMS_DIFF;
+        for (index, title) in titles.iter().enumerate() {
+            items.push(MenuItem {
+                btn: Rectangle {
+                    x: (window_width as f32 - DEFAULT_MENU_ITEM_WIDTH) / 2.0, 
+                    y: (window_height as f32 - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF), 
+                    width: DEFAULT_MENU_ITEM_WIDTH, 
+                    height: DEFAULT_MENU_ITEM_HEIGHT,
+                },
+                content: title.clone(),
+                color: Color::LIGHTGRAY,
+            });
+        }
+        items
+    }
+
     pub fn new(game: &game::Game) -> Self {
+        let window_width: f32 = game.get_window_width() as f32;
+        let window_height: f32 = game.get_window_height() as f32;
+
+        let items_titles: Vec<String> = vec![BTN_START_TEXT.to_string(), BTN_SETTINGS_TEXT.to_string(), BTN_EXIT_TEXT.to_string()];
+        let settings_items_titles: Vec<String> = vec![BTN_FULLSCREEN_TEXT.to_string(), BTN_BACK_TEXT.to_string()];
+
         Self {
             state: MenuState::Primary,
-            btn_start: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32) / 2.0 - 220.0, 
-                400.0, 
-                80.0,
-            ),
-            btn_start_color: Color::LIGHTGRAY,
-            btn_load: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32) / 2.0 - 100.0, 
-                400.0, 
-                80.0,
-            ),
-            btn_load_color: Color::LIGHTGRAY,
-            btn_settings: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32) / 2.0 + 20.0, 
-                400.0, 
-                80.0
-            ),
-            btn_settings_color: Color::LIGHTGRAY,
-            btn_exit: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32) / 2.0 + 140.0, 
-                400.0, 
-                80.0
-            ),
-            btn_exit_color: Color::LIGHTGRAY,
-            btn_fullscreen: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32) / 2.0 - 100.0, 
-                400.0, 
-                80.0
-            ),
-            btn_fullscreen_color: Color::LIGHTGRAY,
-            btn_back: Rectangle::new(
-                (game.get_window_width() as f32 - 400.0) / 2.0, 
-                (game.get_window_height() as f32) / 2.0 + 20.0, 
-                400.0, 
-                80.0
-            ),
-            btn_back_color: Color::LIGHTGRAY,
+            items: Self::construct_menu_items(items_titles, window_width, window_height),
+            settings_items: Self::construct_menu_items(settings_items_titles, window_width, window_height),
         }
     }
 
-    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, player: &mut player::Player, timer: &mut timer::Timer) {
+    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, player: &mut player::Player) {
         if game.get_state() == game::GameState::Menu {
             let mouse_pos = rl.get_mouse_position();
 
             if self.state == MenuState::Primary {
-                if self.btn_start.check_collision_point_rec(mouse_pos) {
-                    self.btn_start_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        game.set_state(game::GameState::Game);
-                        timer.start();
-                        player.restart();
+                for item in self.items.iter_mut() {
+                    if item.btn.check_collision_point_rec(mouse_pos) {
+                        item.color = Color::LIGHTGREEN;
+                        if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                            match item.content.as_str() {
+                                BTN_START_TEXT => {
+                                    game.set_state(game::GameState::Game);
+                                    player.restart();
+                                },
+                                BTN_LOAD_TEXT => {
+                                    game.set_state(game::GameState::Game);
+                                },
+                                BTN_SETTINGS_TEXT => {
+                                    self.state = MenuState::Settings;
+                                },
+                                BTN_EXIT_TEXT => {
+                                    std::process::exit(0);
+                                },
+                                _ => {},
+                            }
+                        }
+                    } else {
+                        item.color = Color::LIGHTGRAY;
                     }
-                } else {
-                    self.btn_start_color = Color::LIGHTGRAY;
-                }
-
-                if self.btn_load.check_collision_point_rec(mouse_pos) {
-                    self.btn_load_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        game.set_state(game::GameState::Game);
-                    }
-                } else {
-                    self.btn_load_color = Color::LIGHTGRAY;
-                }
-
-                if self.btn_settings.check_collision_point_rec(mouse_pos) {
-                    self.btn_settings_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        self.state = MenuState::Settings;
-                    }
-                } else {
-                    self.btn_settings_color = Color::LIGHTGRAY;
-                }
-
-                if self.btn_exit.check_collision_point_rec(mouse_pos) {
-                    self.btn_exit_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        std::process::exit(0);
-                    }
-                } else {
-                    self.btn_exit_color = Color::LIGHTGRAY;
                 }
             } else if self.state == MenuState::Settings {
-                if self.btn_fullscreen.check_collision_point_rec(mouse_pos) {
-                    self.btn_fullscreen_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        rl.toggle_fullscreen();
-                        self.update_btn_positions(game);
-                    }
-                } else {
-                    self.btn_fullscreen_color = Color::LIGHTGRAY;
-                }
+                for item in self.settings_items.iter_mut() {
+                    if item.btn.check_collision_point_rec(mouse_pos) {
+                        item.color = Color::LIGHTGREEN;
+                        if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                            match item.content.as_str() {
+                                BTN_FULLSCREEN_TEXT => {
+                                    rl.toggle_fullscreen();
 
-                if self.btn_back.check_collision_point_rec(mouse_pos) {
-                    self.btn_back_color = Color::LIGHTGREEN;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        self.state = MenuState::Primary;
+                                    // ToDo: fix bug with wrong button position after toggling fullscreen mode
+                                    // self.update_btn_positions(game);
+                                },
+                                BTN_BACK_TEXT => {
+                                    self.state = MenuState::Primary;
+                                },
+                                _ => {},
+                            }
+                        }
+                    } else {
+                        item.color = Color::LIGHTGRAY;
                     }
-                } else {
-                    self.btn_back_color = Color::LIGHTGRAY;
                 }
             }
         }
@@ -151,13 +138,13 @@ impl Menu {
     pub fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
-                self.draw_menu_button(d, &self.btn_start, BTN_START_TEXT, &self.btn_start_color);
-                self.draw_menu_button(d, &self.btn_load, BTN_LOAD_TEXT, &self.btn_load_color);
-                self.draw_menu_button(d, &self.btn_settings, BTN_SETTINGS_TEXT, &self.btn_settings_color);
-                self.draw_menu_button(d, &self.btn_exit, BTN_EXIT_TEXT, &self.btn_exit_color);
+                for item in self.items.iter() {
+                    self.draw_menu_button(d, &item.btn, item.content.as_str(), &item.color);
+                }
             } else if self.state == MenuState::Settings {
-                self.draw_menu_button(d, &self.btn_fullscreen, BTN_FULLSCREEN_TEXT, &self.btn_fullscreen_color);
-                self.draw_menu_button(d, &self.btn_back, BTN_BACK_TEXT, &self.btn_back_color);
+                for item in self.settings_items.iter() {
+                    self.draw_menu_button(d, &item.btn, item.content.as_str(), &item.color);
+                }
             }
         }
     }
@@ -172,22 +159,23 @@ impl Menu {
     }
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {
-        self.btn_start.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_start.y = (game.get_window_height() as f32) / 2.0 - 220.0;
+        let window_width: f32 = game.get_window_width() as f32;
+        let window_height: f32 = game.get_window_height() as f32;
 
-        self.btn_load.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_load.y = (game.get_window_height() as f32) / 2.0 - 100.0;
+        let items_length: f32 = self.items.len() as f32;
+        let settings_items_length: f32 = self.settings_items.len() as f32;
 
-        self.btn_settings.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_settings.y = (game.get_window_height() as f32) / 2.0 + 20.0;
+        let all_items_height: f32 = items_length * DEFAULT_MENU_ITEM_HEIGHT + (items_length - 1.0) * DEFAULT_MENU_ITEMS_DIFF;
+        let all_settings_items_height: f32 = settings_items_length * DEFAULT_MENU_ITEM_HEIGHT + (settings_items_length - 1.0) * DEFAULT_MENU_ITEMS_DIFF;
 
-        self.btn_exit.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_exit.y = (game.get_window_height() as f32) / 2.0 + 140.0;
+        for (index, item) in self.items.iter_mut().enumerate() {
+            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
+            item.btn.y = (window_height - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
+        }
 
-        self.btn_fullscreen.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_fullscreen.y = (game.get_window_height() as f32) / 2.0 - 100.0;
-
-        self.btn_back.x = (game.get_window_width() as f32 - 400.0) / 2.0;
-        self.btn_back.y = (game.get_window_height() as f32) / 2.0 + 20.0;
+        for (index, item) in self.settings_items.iter_mut().enumerate() {
+            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
+            item.btn.y = (window_height - all_settings_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
+        }
     }
 }

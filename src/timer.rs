@@ -10,6 +10,8 @@ pub struct Timer {
 }
 
 impl Timer {
+    // ToDo: implement pause timer feature
+
     pub fn new(duration: i32) -> Self {
         Self {
             is_running: false,

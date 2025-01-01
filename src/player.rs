@@ -2,7 +2,8 @@ use raylib::prelude::*;
 use raylib::consts::MouseButton::*;
 
 use crate::game;
-use crate::utils;
+use crate::timer;
+use crate::utils::{generate_numbers_array, draw_text_center};
 
 const RECTANGLE_WIDTH: f32 = 100.0;
 const RECTANGLE_HEIGHT: f32 = 60.0;
@@ -18,6 +19,7 @@ pub struct Player {
     incorrect_btn_index: i32,
     correct_buttons: Vec<i32>,
     score: i32,
+    timer: timer::Timer,
 }
 
 impl Player {
@@ -29,6 +31,7 @@ impl Player {
             incorrect_btn_index: -1,
             correct_buttons: Vec::new(),
             score: 0,
+            timer: timer::Timer::new(2 * 60),
         };
         for v_index in 0..V_COUNT {
             for h_index in 0..H_COUNT {
@@ -43,27 +46,31 @@ impl Player {
         obj
     }
 
-    pub fn get_score(&self) -> i32 {
-        self.score
-    }
-
     pub fn is_started(&self) -> bool {
         self.numbers.len() > 0
     }
 
     pub fn restart(&mut self) {
-        self.numbers = utils::generate_numbers_array(H_COUNT * V_COUNT);
+        self.numbers = generate_numbers_array(H_COUNT * V_COUNT);
         self.active_btn_index = -1;
         self.incorrect_btn_index = -1;
         self.correct_buttons.clear();
         self.score = 0;
+        self.timer.start();
     }
     
-    pub fn process_player_controller(&mut self, rl: &RaylibHandle, game: &game::Game) {
+    pub fn process_player_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
         if game.get_state() == game::GameState::Game {
             let mouse_pos = rl.get_mouse_position();
             let mut has_collision: bool = false;
             let mut index: i32;
+
+            if self.correct_buttons.len() == (H_COUNT * V_COUNT) as usize {
+                game.set_state(game::GameState::Win)
+            }
+            if self.timer.is_over() {
+                game.set_state(game::GameState::Lose);
+            }
 
             for (i, el) in self.buttons.iter().enumerate() {
                 index = i as i32;
@@ -121,6 +128,18 @@ impl Player {
                 d.draw_text(&text, text_padding.x as i32, text_padding.y as i32, 48, text_color);
                 text_color = Color::BLACK;
             }
+
+            self.timer.draw(d, &game);
+        } else if game.get_state() == game::GameState::Win {
+            draw_text_center(d, "Congratulations. You win!!!", game.get_window_height() / 2 - 30, 60, Color::GREEN, &game)
+        } else if game.get_state() == game::GameState::Lose {
+            let lose_text = format!("Sorry. You lose with score: {0} points.", self.score);
+            draw_text_center(d, lose_text.as_str(), game.get_window_height() / 2 - 30, 60, Color::RED, &game)
         }
+    }
+
+    pub fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        let welcome_text = format!("Your score is {0} points.", self.score);
+        draw_text_center(d, welcome_text.as_str(), 12, 36, Color::GREEN, &game);
     }
 }
