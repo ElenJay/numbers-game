@@ -12,7 +12,7 @@ const V_OPACITY: f32 = 40.0;
 const H_COUNT: i32 = 8;
 const V_COUNT: i32 = 7;
 
-pub struct Player {
+pub struct Level {
     numbers: Vec<i32>,
     buttons: Vec<Rectangle>,
     active_btn_index: i32,
@@ -22,7 +22,7 @@ pub struct Player {
     timer: timer::Timer,
 }
 
-impl Player {
+impl Level {
     pub fn new() -> Self {
         let mut obj = Self {
             numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
@@ -59,7 +59,7 @@ impl Player {
         self.timer.start();
     }
     
-    pub fn process_player_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
+    pub fn process_level_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
         if game.get_state() == game::GameState::Game {
             let mouse_pos = rl.get_mouse_position();
             let mut has_collision: bool = false;
@@ -72,30 +72,34 @@ impl Player {
                 game.set_state(game::GameState::Lose);
             }
 
-            for (i, el) in self.buttons.iter().enumerate() {
-                index = i as i32;
-                if self.correct_buttons.contains(&index) {
-                    continue;
-                }
-
-                if el.check_collision_point_rec(mouse_pos) {
-                    has_collision = true;
-                    self.active_btn_index = index;
-                    if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                        if self.numbers[i] == self.correct_buttons.len() as i32 + 1 {
-                            self.correct_buttons.push(index);
-                            self.incorrect_btn_index = -1;
-                            self.score += 1;
-                        } else {
-                            self.incorrect_btn_index = index;
-                        }
-                        self.active_btn_index = -1;
+            if self.timer.is_active() {
+                for (i, el) in self.buttons.iter().enumerate() {
+                    index = i as i32;
+                    if self.correct_buttons.contains(&index) {
+                        continue;
                     }
-                    break;
+
+                    if el.check_collision_point_rec(mouse_pos) {
+                        has_collision = true;
+                        self.active_btn_index = index;
+                        if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                            if self.numbers[i] == self.correct_buttons.len() as i32 + 1 {
+                                self.correct_buttons.push(index);
+                                self.incorrect_btn_index = -1;
+                                self.score += 1;
+                            } else {
+                                self.incorrect_btn_index = index;
+                            }
+                            self.active_btn_index = -1;
+                        }
+                        break;
+                    }
                 }
-            }
-            if !has_collision {
-                self.active_btn_index = -1;
+                if !has_collision {
+                    self.active_btn_index = -1;
+                }
+            } else {
+                self.timer.activate();
             }
         }
     }
@@ -139,7 +143,9 @@ impl Player {
     }
 
     pub fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        let welcome_text = format!("Your score is {0} points.", self.score);
-        draw_text_center(d, welcome_text.as_str(), 12, 36, Color::GREEN, &game);
+        if game.get_state() == game::GameState::Game {
+            let text = format!("Your score  -  {0} points.", self.score);
+            draw_text_center(d, text.as_str(), 12, 36, Color::GREEN, &game);
+        }
     }
 }

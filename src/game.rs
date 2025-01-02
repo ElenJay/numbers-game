@@ -6,7 +6,7 @@ const WINDOW_HEIGHT: i32 = 900;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
-    Debug,
+    // Debug,
     Release,
 }
 
@@ -18,9 +18,17 @@ pub enum GameState {
     Lose,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub struct GameSettings {
+    is_fullscreen: bool,
+    is_vsync: bool,
+    is_fps_visible: bool,
+}
+
 pub struct Game {
     mode: GameMode,
     state: GameState,
+    settings: GameSettings,
     window_width: i32,
     window_height: i32,
 }
@@ -30,6 +38,11 @@ impl Game {
         Self {
             mode: GameMode::Release,
             state: GameState::Menu,
+            settings: GameSettings {
+                is_fullscreen: false,
+                is_vsync: true,
+                is_fps_visible: false,
+            },
             window_width: WINDOW_WIDTH,
             window_height: WINDOW_HEIGHT,
         }
@@ -41,6 +54,14 @@ impl Game {
 
     pub fn set_state(&mut self, state: GameState) {
         self.state = state;
+    }
+
+    pub fn get_settings(&self) -> &GameSettings {
+        &self.settings
+    }
+
+    pub fn toggle_fps_monitor(&mut self) {
+        self.settings.is_fps_visible = !self.settings.is_fps_visible;
     }
 
     pub fn get_window_width(&self) -> i32 {
@@ -74,7 +95,7 @@ impl Game {
     }
 
     pub fn draw_fps(&self, d: &mut RaylibDrawHandle) {
-        if self.mode == GameMode::Debug {
+        if self.settings.is_fps_visible {
             d.draw_fps( 10, 10);
         }
     }

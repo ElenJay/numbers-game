@@ -2,23 +2,25 @@ use raylib::prelude::*;
 use raylib::consts::MouseButton::*;
 
 use crate::game;
-use crate::player;
+use crate::level;
 
 const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
 const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
 const DEFAULT_MENU_ITEMS_DIFF: f32 = DEFAULT_MENU_ITEM_HEIGHT / 2.0;
+const DEFAULT_MENU_ITEM_FONT_SIZE: i32 = 54;
 
 const BTN_START_TEXT: &str = "Start";
-const BTN_LOAD_TEXT: &str = "Load";
+const BTN_CONTINUE_TEXT: &str = "Continue";
 const BTN_SETTINGS_TEXT: &str = "Settings";
 const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
+const BTN_TOGGLE_FPS_TEXT: &str = "FPS counter";
 const BTN_BACK_TEXT: &str = "Back";
 
 // ToDo: separate menu items and implement enum iterator
 // enum MENU_ITEMS_TEXT {
 //     BTN_START_TEXT,
-//     BTN_LOAD_TEXT,
+//     BTN_CONTINUE_TEXT,
 //     BTN_SETTINGS_TEXT,
 //     BTN_EXIT_TEXT,
 // }
@@ -69,8 +71,16 @@ impl Menu {
         let window_width: f32 = game.get_window_width() as f32;
         let window_height: f32 = game.get_window_height() as f32;
 
-        let items_titles: Vec<String> = vec![BTN_START_TEXT.to_string(), BTN_SETTINGS_TEXT.to_string(), BTN_EXIT_TEXT.to_string()];
-        let settings_items_titles: Vec<String> = vec![BTN_FULLSCREEN_TEXT.to_string(), BTN_BACK_TEXT.to_string()];
+        let items_titles: Vec<String> = vec![
+            BTN_START_TEXT.to_string(), 
+            BTN_SETTINGS_TEXT.to_string(), 
+            BTN_EXIT_TEXT.to_string(), 
+        ];
+        let settings_items_titles: Vec<String> = vec![
+            BTN_FULLSCREEN_TEXT.to_string(), 
+            BTN_TOGGLE_FPS_TEXT.to_string(), 
+            BTN_BACK_TEXT.to_string(),
+        ];
 
         Self {
             state: MenuState::Primary,
@@ -79,7 +89,7 @@ impl Menu {
         }
     }
 
-    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, player: &mut player::Player) {
+    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, level: &mut level::Level) {
         if game.get_state() == game::GameState::Menu {
             let mouse_pos = rl.get_mouse_position();
 
@@ -91,9 +101,9 @@ impl Menu {
                             match item.content.as_str() {
                                 BTN_START_TEXT => {
                                     game.set_state(game::GameState::Game);
-                                    player.restart();
+                                    level.restart();
                                 },
-                                BTN_LOAD_TEXT => {
+                                BTN_CONTINUE_TEXT => {
                                     game.set_state(game::GameState::Game);
                                 },
                                 BTN_SETTINGS_TEXT => {
@@ -124,6 +134,9 @@ impl Menu {
                                 BTN_BACK_TEXT => {
                                     self.state = MenuState::Primary;
                                 },
+                                BTN_TOGGLE_FPS_TEXT => {
+                                    game.toggle_fps_monitor();
+                                },
                                 _ => {},
                             }
                         }
@@ -152,10 +165,10 @@ impl Menu {
     pub fn draw_menu_button(&self, d: &mut RaylibDrawHandle, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
         d.draw_rectangle_rec(btn, btn_color);
         let btn_padding = Vector2::new(
-            btn.x + (btn.width - d.measure_text(btn_text, 64) as f32) / 2.0, 
-            btn.y + (btn.height - 64.0) / 2.0
+            btn.x + (btn.width - d.measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE) as f32) / 2.0, 
+            btn.y + (btn.height - DEFAULT_MENU_ITEM_FONT_SIZE as f32) / 2.0
         );
-        d.draw_text(btn_text, btn_padding.x as i32, btn_padding.y as i32, 64, Color::BLACK);
+        d.draw_text(btn_text, btn_padding.x as i32, btn_padding.y as i32, DEFAULT_MENU_ITEM_FONT_SIZE, Color::BLACK);
     }
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {

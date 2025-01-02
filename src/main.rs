@@ -4,12 +4,16 @@ use std::env;
 
 mod game;
 mod menu;
-mod player;
+mod level;
 mod utils;
 mod timer;
 
+use game::Game;
+use menu::Menu;
+use level::Level;
+
 fn main() {
-    let mut game = game::Game::new();
+    let mut game = Game::new();
 
     let (mut rl, thread) = raylib::init()
         .size(game.get_window_width(), game.get_window_height())
@@ -22,8 +26,8 @@ fn main() {
         // ToDo: in MacOS the app should be properly bundled to show icon
         rl.set_window_icon(Image::load_image("assets/icon.png").unwrap());
     }
-    let mut menu = menu::Menu::new(&game);
-    let mut player = player::Player::new();
+    let mut menu = Menu::new(&game);
+    let mut level = Level::new();
 
     while !rl.window_should_close() {
         if rl.is_window_resized() {
@@ -34,8 +38,8 @@ fn main() {
 
         // Process control
         game.process_game_controller(&mut rl);
-        menu.process_menu_controller(&mut rl, &mut game, &mut player);
-        player.process_player_controller(&rl, &mut game);
+        menu.process_menu_controller(&mut rl, &mut game, &mut level);
+        level.process_level_controller(&rl, &mut game);
 
         // Drawing
         let mut d = rl.begin_drawing(&thread);
@@ -43,7 +47,7 @@ fn main() {
 
         game.draw_fps(&mut d);
         menu.draw_menu(&mut d, &game);
-        player.draw_score(&mut d, &game);
-        player.draw(&mut d, &game);
+        level.draw_score(&mut d, &game);
+        level.draw(&mut d, &game);
     }
 }
