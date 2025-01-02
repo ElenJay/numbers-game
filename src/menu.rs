@@ -104,7 +104,7 @@ impl Menu {
                                     level.restart();
                                 },
                                 BTN_CONTINUE_TEXT => {
-                                    game.set_state(game::GameState::Game);
+                                    level.resume(game);
                                 },
                                 BTN_SETTINGS_TEXT => {
                                     self.state = MenuState::Settings;

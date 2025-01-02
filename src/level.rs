@@ -50,6 +50,11 @@ impl Level {
         self.numbers.len() > 0
     }
 
+    pub fn resume(&mut self, game: &mut game::Game) {
+        game.set_state(game::GameState::Game);
+        self.timer.resume();
+    }
+
     pub fn restart(&mut self) {
         self.numbers = generate_numbers_array(H_COUNT * V_COUNT);
         self.active_btn_index = -1;
@@ -60,6 +65,9 @@ impl Level {
     }
     
     pub fn process_level_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
+        if game.get_state() == game::GameState::Menu && self.is_started() {
+            self.timer.pause();
+        }
         if game.get_state() == game::GameState::Game {
             let mouse_pos = rl.get_mouse_position();
             let mut has_collision: bool = false;

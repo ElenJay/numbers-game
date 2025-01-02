@@ -8,16 +8,16 @@ const START_DELAY_SECS: f64 = 0.1;
 pub struct Timer {
     is_running: bool,
     start_time: f64,
+    pause_time: f64,
     duration: f64,
 }
 
 impl Timer {
-    // ToDo: implement pause timer feature
-
     pub fn new(duration: i32) -> Self {
         Self {
             is_running: false,
             start_time: 0.0,
+            pause_time: 0.0,
             duration: duration as f64,
         }
     }
@@ -39,6 +39,21 @@ impl Timer {
     pub fn start(&mut self) {
         self.is_running = false;
         self.start_time = Timer::get_current_time_in_secs();
+    }
+
+    pub fn pause(&mut self) {
+        if self.is_running && self.pause_time == 0.0 {
+            self.is_running = false;
+            self.pause_time = Timer::get_current_time_in_secs();
+        }
+    }
+
+    pub fn resume(&mut self) {
+        if !self.is_running && self.pause_time > 0.0 {
+            self.start_time = Timer::get_current_time_in_secs() - (self.pause_time - self.start_time);
+            self.pause_time = 0.0;
+            self.is_running = true;
+        }
     }
 
     pub fn finish(&mut self) {
