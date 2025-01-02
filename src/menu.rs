@@ -40,6 +40,7 @@ pub struct MenuItem {
     btn: Rectangle,
     content: String,
     color: Color,
+    is_disabled: bool,
 }
 
 pub struct Menu {
@@ -62,6 +63,7 @@ impl Menu {
                 },
                 content: title.clone(),
                 color: Color::LIGHTGRAY,
+                is_disabled: title == BTN_CONTINUE_TEXT,
             });
         }
         items
@@ -73,6 +75,7 @@ impl Menu {
 
         let items_titles: Vec<String> = vec![
             BTN_START_TEXT.to_string(), 
+            BTN_CONTINUE_TEXT.to_string(),
             BTN_SETTINGS_TEXT.to_string(), 
             BTN_EXIT_TEXT.to_string(), 
         ];
@@ -95,6 +98,14 @@ impl Menu {
 
             if self.state == MenuState::Primary {
                 for item in self.items.iter_mut() {
+                    if item.is_disabled {
+                        if item.content.as_str() == BTN_CONTINUE_TEXT && level.is_started() {
+                            item.is_disabled = false;
+                        } else {
+                            continue;
+                        }
+                    }
+                    
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {

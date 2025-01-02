@@ -42,17 +42,16 @@ impl Timer {
     }
 
     pub fn pause(&mut self) {
-        if self.is_running && self.pause_time == 0.0 {
+        if self.pause_time == 0.0 {
             self.is_running = false;
             self.pause_time = Timer::get_current_time_in_secs();
         }
     }
 
     pub fn resume(&mut self) {
-        if !self.is_running && self.pause_time > 0.0 {
+        if self.pause_time > 0.0 {
             self.start_time = Timer::get_current_time_in_secs() - (self.pause_time - self.start_time);
             self.pause_time = 0.0;
-            self.is_running = true;
         }
     }
 
