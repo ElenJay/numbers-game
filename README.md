@@ -8,7 +8,13 @@ Build dependencies with `cargo build`, and then run with `cargo run`.
 
 ### Menu
 
-![Game Screenshot Example](docs/images/menu.png)
+![Game Menu Screenshot](docs/images/start-menu.png)
+
+![Game Settings Screenshot](docs/images/settings.png)
+
+### How to Play
+
+![Game Settings Screenshot](docs/images/help.png)
 
 ### Gameplay
 
