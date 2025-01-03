@@ -74,10 +74,12 @@ impl Level {
             let mut index: i32;
 
             if self.correct_buttons.len() == (H_COUNT * V_COUNT) as usize {
-                game.set_state(game::GameState::Win)
+                game.set_state(game::GameState::Win);
+                self.timer.finish();
             }
             if self.timer.is_over() {
                 game.set_state(game::GameState::Lose);
+                self.timer.finish();
             }
 
             if self.timer.is_active() {

@@ -1,6 +1,8 @@
 use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
 
+use crate::menu::Menu;
+
 const WINDOW_WIDTH: i32 = 1600;
 const WINDOW_HEIGHT: i32 = 900;
 
@@ -31,6 +33,8 @@ pub struct Game {
     settings: GameSettings,
     window_width: i32,
     window_height: i32,
+    fullscreen_width: i32,
+    fullscreen_height: i32,
 }
 
 impl Game {
@@ -39,12 +43,14 @@ impl Game {
             mode: GameMode::Release,
             state: GameState::Menu,
             settings: GameSettings {
-                is_fullscreen: false,
+                is_fullscreen: true,
                 is_vsync: true,
                 is_fps_visible: false,
             },
             window_width: WINDOW_WIDTH,
             window_height: WINDOW_HEIGHT,
+            fullscreen_width: 0,
+            fullscreen_height: 0,
         }
     }
 
@@ -54,14 +60,6 @@ impl Game {
 
     pub fn set_state(&mut self, state: GameState) {
         self.state = state;
-    }
-
-    pub fn get_settings(&self) -> &GameSettings {
-        &self.settings
-    }
-
-    pub fn toggle_fps_monitor(&mut self) {
-        self.settings.is_fps_visible = !self.settings.is_fps_visible;
     }
 
     pub fn get_window_width(&self) -> i32 {
@@ -80,12 +78,43 @@ impl Game {
         self.window_height = height;
     }
 
-    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle) {
+    pub fn set_fullscreen_sizes(&mut self, width: i32, height: i32) {
+        self.fullscreen_width = width;
+        self.fullscreen_height = height;
+    }
+
+    pub fn toggle_fps_monitor(&mut self) {
+        self.settings.is_fps_visible = !self.settings.is_fps_visible;
+    }
+
+    pub fn toggle_fullscreen(&mut self, rl: &mut RaylibHandle, menu: &mut Menu) {
+        self.settings.is_fullscreen = !self.settings.is_fullscreen;
+
+        // Toggling fullscreen with borderless window mode requires order
+        if self.settings.is_fullscreen {
+            rl.toggle_borderless_windowed();
+            rl.set_window_size(self.fullscreen_width, self.fullscreen_height);
+            rl.toggle_fullscreen();
+        } else {
+            rl.toggle_fullscreen();
+            rl.toggle_borderless_windowed();
+        }
+
+        // Update window sizes in the Game object
+        self.set_window_width(rl.get_screen_width());
+        self.set_window_height(rl.get_screen_height());
+
+        // Recalculate menu buttons positions
+        menu.update_btn_positions(self);
+    }
+
+    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle, menu: &mut Menu) {
         rl.set_exit_key(None);
 
         if rl.is_key_released(KEY_F1) {
-            rl.toggle_fullscreen();
+            self.toggle_fullscreen(rl, menu);
         }
+
         if rl.is_key_released(KEY_ESCAPE) {
             match self.state {
                 GameState::Game | GameState::Win | GameState::Lose => self.state = GameState::Menu,

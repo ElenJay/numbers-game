@@ -131,16 +131,15 @@ impl Menu {
                     }
                 }
             } else if self.state == MenuState::Settings {
+                let mut is_fullscreen_required: bool = false;
+
                 for item in self.settings_items.iter_mut() {
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                             match item.content.as_str() {
                                 BTN_FULLSCREEN_TEXT => {
-                                    rl.toggle_fullscreen();
-
-                                    // ToDo: fix bug with wrong button position after toggling fullscreen mode
-                                    // self.update_btn_positions(game);
+                                    is_fullscreen_required = true;
                                 },
                                 BTN_BACK_TEXT => {
                                     self.state = MenuState::Primary;
@@ -154,6 +153,9 @@ impl Menu {
                     } else {
                         item.color = Color::LIGHTGRAY;
                     }
+                }
+                if is_fullscreen_required {
+                    game.toggle_fullscreen(rl, self);
                 }
             }
         }
