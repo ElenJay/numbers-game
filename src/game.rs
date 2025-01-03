@@ -4,7 +4,7 @@
 use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
 
-use crate::menu::Menu;
+use crate::menu::{Menu, MenuState};
 use crate::level::Level;
 
 const WINDOW_WIDTH: i32 = 1600;
@@ -123,9 +123,13 @@ impl Game {
         }
 
         if rl.is_key_released(KEY_ESCAPE) {
-            match self.state {
-                GameState::Game | GameState::Win | GameState::Lose => self.state = GameState::Menu,
-                GameState::Menu => std::process::exit(0),
+            if menu.get_state() == MenuState::Help {
+                menu.set_state(MenuState::Primary);
+            } else {
+                match self.state {
+                    GameState::Game | GameState::Win | GameState::Lose => self.state = GameState::Menu,
+                    GameState::Menu => std::process::exit(0),
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::level;
+use crate::utils::draw_text_center;
 
 const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
 const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
@@ -12,16 +13,28 @@ const DEFAULT_MENU_ITEM_FONT_SIZE: i32 = 54;
 const BTN_START_TEXT: &str = "Start";
 const BTN_CONTINUE_TEXT: &str = "Continue";
 const BTN_SETTINGS_TEXT: &str = "Settings";
+const BTN_HELP_TEXT: &str = "Help";
 const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
 const BTN_TOGGLE_FPS_TEXT: &str = "FPS counter";
 const BTN_BACK_TEXT: &str = "Back";
+
+const HELP_HOW_TO_PLAY_TEXT: &str = "How to Play:";
+const HELP_HOW_TO_PLAY_TEXT_1: &str = "1. Click the numbers from 1 to 56 in order as fast as you can.";
+const HELP_HOW_TO_PLAY_TEXT_2: &str = "2. Time's ticking! The game ends when the timer runs out.";
+const HELP_HOW_TO_PLAY_TEXT_3: &str = "3. Aim for the highest score: Your score is based on the number of numbers you clicked correctly within the time limit.";
+const HELP_TIPS_TEXT: &str = "Tips:";
+const HELP_TIPS_TEXT_1: &str = "- Stay focused! Keep your eyes on the numbers and click quickly.";
+const HELP_TIPS_TEXT_2: &str = "- Practice makes perfect! The more you play, the faster you'll get.";
+const HELP_TIPS_TEXT_3: &str = "- Have fun! This is a challenging and addictive game.";
+const HELP_BACK_TEXT: &str = "Press Esc button to go back to the menu...";
 
 // ToDo: separate menu items and implement enum iterator
 // enum MENU_ITEMS_TEXT {
 //     BTN_START_TEXT,
 //     BTN_CONTINUE_TEXT,
 //     BTN_SETTINGS_TEXT,
+//     BTN_HELP_TEXT,
 //     BTN_EXIT_TEXT,
 // }
 
@@ -34,6 +47,7 @@ const BTN_BACK_TEXT: &str = "Back";
 pub enum MenuState {
     Primary,
     Settings,
+    Help,
 }
 
 pub struct MenuItem {
@@ -77,6 +91,7 @@ impl Menu {
             BTN_START_TEXT.to_string(), 
             BTN_CONTINUE_TEXT.to_string(),
             BTN_SETTINGS_TEXT.to_string(), 
+            BTN_HELP_TEXT.to_string(),
             BTN_EXIT_TEXT.to_string(), 
         ];
         let settings_items_titles: Vec<String> = vec![
@@ -90,6 +105,14 @@ impl Menu {
             items: Self::construct_menu_items(items_titles, window_width, window_height),
             settings_items: Self::construct_menu_items(settings_items_titles, window_width, window_height),
         }
+    }
+
+    pub fn get_state(&self) -> MenuState {
+        self.state
+    }
+
+    pub fn set_state(&mut self, state: MenuState) {
+        self.state = state;
     }
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {
@@ -140,6 +163,9 @@ impl Menu {
                                 },
                                 BTN_SETTINGS_TEXT => {
                                     self.state = MenuState::Settings;
+                                },
+                                BTN_HELP_TEXT => {
+                                    self.state = MenuState::Help;
                                 },
                                 BTN_EXIT_TEXT => {
                                     std::process::exit(0);
@@ -201,6 +227,28 @@ impl Menu {
                 for item in self.settings_items.iter() {
                     self.draw_menu_button(d, &item.btn, item.content.as_str(), &item.color);
                 }
+            } else if self.state == MenuState::Help {
+                let text_length = d.measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20);
+                let x: i32 = (game.get_window_width() - text_length) / 2;
+                let mut y: i32 = (game.get_window_height() - (100 + 64 * 3 + 36 * 4 + 32)) / 2;
+
+                d.draw_text(HELP_HOW_TO_PLAY_TEXT, x, y, 32, Color::BLACK);
+                y += 64;
+                d.draw_text(HELP_HOW_TO_PLAY_TEXT_1, x, y, 24, Color::BLACK);
+                y += 36;
+                d.draw_text(HELP_HOW_TO_PLAY_TEXT_2, x, y, 24, Color::BLACK);
+                y += 36;
+                d.draw_text(HELP_HOW_TO_PLAY_TEXT_3, x, y, 24, Color::BLACK);
+                y += 64;
+                d.draw_text(HELP_TIPS_TEXT, x, y, 32, Color::BLACK);
+                y += 64;
+                d.draw_text(HELP_TIPS_TEXT_1, x, y, 24, Color::BLACK);
+                y += 36;
+                d.draw_text(HELP_TIPS_TEXT_2, x, y, 24, Color::BLACK);
+                y += 36;
+                d.draw_text(HELP_TIPS_TEXT_3, x, y, 24, Color::BLACK);
+                y += 100;
+                d.draw_text(HELP_BACK_TEXT, x, y, 32, Color::BLACK);
             }
         }
     }
