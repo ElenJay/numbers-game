@@ -85,7 +85,7 @@ impl Level {
         self.timer.start();
     }
     
-    pub fn process_level_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
+    pub fn process_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
         if game.get_state() == game::GameState::Menu && self.is_started() {
             self.timer.pause();
         }
@@ -172,7 +172,7 @@ impl Level {
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+    pub fn draw_level(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
             let mut text;
             let mut index: i32;
@@ -232,5 +232,11 @@ impl Level {
             }
             d.draw_text(BTN_EXIT_TEXT, btn_padding.x as i32, btn_padding.y as i32, BTN_TEXT_FONTSIZE, Color::BLACK);
         }
+    }
+
+    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        self.draw_level(d, game);
+        self.draw_score(d, game);
+        self.draw_exit_button(d, game);
     }
 }

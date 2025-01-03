@@ -23,7 +23,33 @@ fn main() {
         .vsync()
         .build();
 
-    // Toggle fullscreen
+    if env::consts::OS != "macos" {
+        // ToDo: in MacOS the app should be properly bundled to show icon
+        rl.set_window_icon(Image::load_image("assets/icon.png").unwrap());
+    }
+
+    update_window_sizes(&mut rl, &mut game);
+
+    let mut menu = Menu::new(&game);
+    let mut level = Level::new(&game);
+
+    while !rl.window_should_close() {
+        // Processing controllers
+        game.process_controller(&mut rl, &mut menu, &mut level);
+        menu.process_controller(&mut rl, &mut game, &mut level);
+        level.process_controller(&rl, &mut game);
+
+        // Drawing
+        let mut d = rl.begin_drawing(&thread);
+        d.clear_background(Color::WHITE);
+
+        game.draw(&mut d);
+        menu.draw(&mut d, &game);
+        level.draw(&mut d, &game);
+    }
+}
+
+fn update_window_sizes(rl: &mut RaylibHandle, game: &mut Game) {
     let monitor_index = get_current_monitor_index();
     
     // ToDo: need to check if it requires on Windows and Linux
@@ -34,8 +60,7 @@ fn main() {
     let window_height = get_monitor_height(monitor_index);
 
     game.set_fullscreen_sizes(window_width, window_height);
-    game.set_window_width(window_width);
-    game.set_window_height(window_height);
+    game.set_window_sizes(window_width, window_height);
 
     if env::consts::OS == "macos" {
         // Mac OS requires to get window size already in fullscreen mode, and only then set it, before enabling fullscreen mode
@@ -43,37 +68,5 @@ fn main() {
         rl.set_window_size(window_width, window_height);
         rl.toggle_fullscreen();
         rl.set_window_focused();
-    }
-
-    let mut menu = Menu::new(&game);
-    let mut level = Level::new(&game);
-
-    if env::consts::OS != "macos" {
-        // ToDo: in MacOS the app should be properly bundled to show icon
-        rl.set_window_icon(Image::load_image("assets/icon.png").unwrap());
-    }
-
-    while !rl.window_should_close() {
-        if rl.is_window_resized() {
-            game.set_window_width(rl.get_screen_width());
-            game.set_window_height(rl.get_screen_height());
-            menu.update_btn_positions(&game);
-            level.update_btn_positions(&game);
-        }
-
-        // Process control
-        game.process_game_controller(&mut rl, &mut menu, &mut level);
-        menu.process_menu_controller(&mut rl, &mut game, &mut level);
-        level.process_level_controller(&rl, &mut game);
-
-        // Drawing
-        let mut d = rl.begin_drawing(&thread);
-        d.clear_background(Color::WHITE);
-
-        game.draw_fps(&mut d);
-        menu.draw_menu(&mut d, &game);
-        level.draw_score(&mut d, &game);
-        level.draw_exit_button(&mut d, &game);
-        level.draw(&mut d, &game);
     }
 }

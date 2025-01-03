@@ -70,15 +70,12 @@ impl Game {
         self.window_width
     }
 
-    pub fn set_window_width(&mut self, width: i32) {
-        self.window_width = width;
-    }
-
     pub fn get_window_height(&self) -> i32 {
         self.window_height
     }
 
-    pub fn set_window_height(&mut self, height: i32) {
+    pub fn set_window_sizes(&mut self, width: i32, height: i32) {
+        self.window_width = width;
         self.window_height = height;
     }
 
@@ -105,16 +102,21 @@ impl Game {
         }
 
         // Update window sizes in the Game object
-        self.set_window_width(rl.get_screen_width());
-        self.set_window_height(rl.get_screen_height());
+        self.set_window_sizes(rl.get_screen_width(), rl.get_screen_height());
 
         // Recalculate menu buttons positions
         menu.update_btn_positions(self);
         level.update_btn_positions(self);
     }
 
-    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle, menu: &mut Menu, level: &mut Level) {
+    pub fn process_controller(&mut self, rl: &mut RaylibHandle, menu: &mut Menu, level: &mut Level) {
         rl.set_exit_key(None);
+
+        if rl.is_window_resized() {
+            self.set_window_sizes(rl.get_screen_width(), rl.get_screen_height());
+            menu.update_btn_positions(self);
+            level.update_btn_positions(self);
+        }
 
         if rl.is_key_released(KEY_F1) {
             self.toggle_fullscreen(rl, menu, level);
@@ -128,9 +130,13 @@ impl Game {
         }
     }
 
-    pub fn draw_fps(&self, d: &mut RaylibDrawHandle) {
+    fn draw_fps(&self, d: &mut RaylibDrawHandle) {
         if self.settings.is_fps_visible {
             d.draw_fps( 10, 10);
         }
+    }
+
+    pub fn draw(&self, d: &mut RaylibDrawHandle) {
+        self.draw_fps(d);
     }
 }

@@ -92,7 +92,28 @@ impl Menu {
         }
     }
 
-    pub fn process_menu_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, level: &mut level::Level) {
+    pub fn update_btn_positions(&mut self, game: &game::Game) {
+        let window_width: f32 = game.get_window_width() as f32;
+        let window_height: f32 = game.get_window_height() as f32;
+
+        let items_length: f32 = self.items.len() as f32;
+        let settings_items_length: f32 = self.settings_items.len() as f32;
+
+        let all_items_height: f32 = items_length * DEFAULT_MENU_ITEM_HEIGHT + (items_length - 1.0) * DEFAULT_MENU_ITEMS_DIFF;
+        let all_settings_items_height: f32 = settings_items_length * DEFAULT_MENU_ITEM_HEIGHT + (settings_items_length - 1.0) * DEFAULT_MENU_ITEMS_DIFF;
+
+        for (index, item) in self.items.iter_mut().enumerate() {
+            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
+            item.btn.y = (window_height - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
+        }
+
+        for (index, item) in self.settings_items.iter_mut().enumerate() {
+            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
+            item.btn.y = (window_height - all_settings_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
+        }
+    }
+
+    pub fn process_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, level: &mut level::Level) {
         if game.get_state() == game::GameState::Menu {
             let mouse_pos = rl.get_mouse_position();
 
@@ -161,7 +182,16 @@ impl Menu {
         }
     }
 
-    pub fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
+        d.draw_rectangle_rec(btn, btn_color);
+        let btn_padding = Vector2::new(
+            btn.x + (btn.width - d.measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE) as f32) / 2.0, 
+            btn.y + (btn.height - DEFAULT_MENU_ITEM_FONT_SIZE as f32) / 2.0
+        );
+        d.draw_text(btn_text, btn_padding.x as i32, btn_padding.y as i32, DEFAULT_MENU_ITEM_FONT_SIZE, Color::BLACK);
+    }
+
+    fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter() {
@@ -175,33 +205,7 @@ impl Menu {
         }
     }
 
-    pub fn draw_menu_button(&self, d: &mut RaylibDrawHandle, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
-        d.draw_rectangle_rec(btn, btn_color);
-        let btn_padding = Vector2::new(
-            btn.x + (btn.width - d.measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE) as f32) / 2.0, 
-            btn.y + (btn.height - DEFAULT_MENU_ITEM_FONT_SIZE as f32) / 2.0
-        );
-        d.draw_text(btn_text, btn_padding.x as i32, btn_padding.y as i32, DEFAULT_MENU_ITEM_FONT_SIZE, Color::BLACK);
-    }
-
-    pub fn update_btn_positions(&mut self, game: &game::Game) {
-        let window_width: f32 = game.get_window_width() as f32;
-        let window_height: f32 = game.get_window_height() as f32;
-
-        let items_length: f32 = self.items.len() as f32;
-        let settings_items_length: f32 = self.settings_items.len() as f32;
-
-        let all_items_height: f32 = items_length * DEFAULT_MENU_ITEM_HEIGHT + (items_length - 1.0) * DEFAULT_MENU_ITEMS_DIFF;
-        let all_settings_items_height: f32 = settings_items_length * DEFAULT_MENU_ITEM_HEIGHT + (settings_items_length - 1.0) * DEFAULT_MENU_ITEMS_DIFF;
-
-        for (index, item) in self.items.iter_mut().enumerate() {
-            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
-            item.btn.y = (window_height - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
-        }
-
-        for (index, item) in self.settings_items.iter_mut().enumerate() {
-            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
-            item.btn.y = (window_height - all_settings_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
-        }
+    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        self.draw_menu(d, game);
     }
 }
