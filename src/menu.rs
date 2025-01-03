@@ -159,7 +159,7 @@ impl Menu {
                             match item.content.as_str() {
                                 BTN_START_TEXT => {
                                     game.set_state(game::GameState::Game);
-                                    level.restart();
+                                    level.restart(game);
                                 },
                                 BTN_CONTINUE_TEXT => {
                                     level.resume(game);

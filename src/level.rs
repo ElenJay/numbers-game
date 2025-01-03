@@ -38,8 +38,6 @@ impl Level {
         if h_opacity > MAX_H_OPACITY { h_opacity = MAX_H_OPACITY; }
         if v_opacity > MAX_V_OPACITY { v_opacity = MAX_V_OPACITY; }
 
-        let timer_duration: i32 = if game.get_difficulty() == game::GameDifficulty::Easy { 2 * 60 } else { 2 * 60 - 15 };
-
         let mut obj = Self {
             numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
             buttons: Vec::new(),
@@ -47,7 +45,7 @@ impl Level {
             incorrect_btn_index: -1,
             correct_buttons: Vec::new(),
             score: 0,
-            timer: timer::Timer::new(timer_duration),
+            timer: timer::Timer::new(Self::get_timer_duration(game)),
             btn_exit: Rectangle {
                 x: window_width as f32 - 150.0 - 10.0, 
                 y: 80.0, 
@@ -71,6 +69,10 @@ impl Level {
         obj
     }
 
+    fn get_timer_duration(game: &game::Game) -> i32 {
+        if game.get_difficulty() == game::GameDifficulty::Easy { 2 * 60 } else { 2 * 60 - 15 }
+    }
+
     pub fn is_started(&self) -> bool {
         self.numbers.len() > 0
     }
@@ -80,12 +82,13 @@ impl Level {
         self.timer.resume();
     }
 
-    pub fn restart(&mut self) {
+    pub fn restart(&mut self, game: &game::Game) {
         self.numbers = generate_numbers_array(H_COUNT * V_COUNT);
         self.active_btn_index = -1;
         self.incorrect_btn_index = -1;
         self.correct_buttons.clear();
         self.score = 0;
+        self.timer = timer::Timer::new(Self::get_timer_duration(game));
         self.timer.start();
     }
     
