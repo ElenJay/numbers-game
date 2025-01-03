@@ -12,6 +12,9 @@ const V_OPACITY: f32 = 40.0;
 const H_COUNT: i32 = 8;
 const V_COUNT: i32 = 7;
 
+const BTN_EXIT_TEXT: &str = "Exit";
+const BTN_TEXT_FONTSIZE: i32 = 48;
+
 pub struct Level {
     numbers: Vec<i32>,
     buttons: Vec<Rectangle>,
@@ -20,10 +23,12 @@ pub struct Level {
     correct_buttons: Vec<i32>,
     score: i32,
     timer: timer::Timer,
+    btn_exit: Rectangle,
+    btn_exit_color: Color,
 }
 
 impl Level {
-    pub fn new() -> Self {
+    pub fn new(game: &game::Game) -> Self {
         let mut obj = Self {
             numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
             buttons: Vec::new(),
@@ -32,6 +37,13 @@ impl Level {
             correct_buttons: Vec::new(),
             score: 0,
             timer: timer::Timer::new(2 * 60),
+            btn_exit: Rectangle {
+                x: game.get_window_width() as f32 - 150.0 - 10.0, 
+                y: 80.0, 
+                width: 150.0, 
+                height: 60.0, 
+            },
+            btn_exit_color: Color::WHITE,
         };
         for v_index in 0..V_COUNT {
             for h_index in 0..H_COUNT {
@@ -72,6 +84,14 @@ impl Level {
             let mouse_pos = rl.get_mouse_position();
             let mut has_collision: bool = false;
             let mut index: i32;
+
+            if self.btn_exit.check_collision_point_rec(mouse_pos) {
+                self.btn_exit_color = Color::LIGHTGREEN;
+                if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                    game.set_state(game::GameState::Menu);
+                    self.btn_exit_color = Color::WHITE;
+                }
+            }
 
             if self.correct_buttons.len() == (H_COUNT * V_COUNT) as usize {
                 game.set_state(game::GameState::Win);
@@ -156,6 +176,23 @@ impl Level {
         if game.get_state() == game::GameState::Game {
             let text = format!("Your score  -  {0} points.", self.score);
             draw_text_center(d, text.as_str(), 12, 36, Color::GREEN, &game);
+        }
+    }
+
+    pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        if game.get_state() == game::GameState::Game {
+            let btn_text_width: i32 = d.measure_text("Exit", BTN_TEXT_FONTSIZE);
+            let btn_padding = Vector2::new(
+                self.btn_exit.x + (self.btn_exit.width - btn_text_width as f32) / 2.0, 
+                self.btn_exit.y + (self.btn_exit.height - BTN_TEXT_FONTSIZE as f32) / 2.0
+            );
+
+            if self.btn_exit_color == Color::WHITE {
+                d.draw_rectangle_lines_ex(self.btn_exit, 1.0, Color::BLACK);
+            } else {
+                d.draw_rectangle_rec(self.btn_exit, self.btn_exit_color);
+            }
+            d.draw_text("Exit", btn_padding.x as i32, btn_padding.y as i32, BTN_TEXT_FONTSIZE, Color::BLACK);
         }
     }
 }

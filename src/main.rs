@@ -46,7 +46,7 @@ fn main() {
     }
 
     let mut menu = Menu::new(&game);
-    let mut level = Level::new();
+    let mut level = Level::new(&game);
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon
@@ -72,6 +72,7 @@ fn main() {
         game.draw_fps(&mut d);
         menu.draw_menu(&mut d, &game);
         level.draw_score(&mut d, &game);
+        level.draw_exit_button(&mut d, &game);
         level.draw(&mut d, &game);
     }
 }
