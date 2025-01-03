@@ -7,8 +7,10 @@ use crate::utils::{generate_numbers_array, draw_text_center};
 
 const RECTANGLE_WIDTH: f32 = 100.0;
 const RECTANGLE_HEIGHT: f32 = 60.0;
-const H_OPACITY: f32 = 40.0;
-const V_OPACITY: f32 = 40.0;
+const MAX_H_OPACITY: f32 = 100.0;
+const MIN_H_OPACITY: f32 = 20.0;
+const MAX_V_OPACITY: f32 = 100.0;
+const MIN_V_OPACITY: f32 = 20.0;
 const H_COUNT: i32 = 8;
 const V_COUNT: i32 = 7;
 
@@ -29,6 +31,13 @@ pub struct Level {
 
 impl Level {
     pub fn new(game: &game::Game) -> Self {
+        let window_width: f32 = game.get_window_width() as f32;
+        let window_height: f32 = game.get_window_height() as f32;
+        let mut h_opacity: f32 = (window_width - 600.0 - H_COUNT as f32 * RECTANGLE_WIDTH) / (H_COUNT - 1) as f32;
+        let mut v_opacity: f32 = (window_height - 600.0 - V_COUNT as f32 * RECTANGLE_HEIGHT) / (V_COUNT - 1) as f32;
+        if h_opacity > MAX_H_OPACITY { h_opacity = MAX_H_OPACITY; }
+        if v_opacity > MAX_V_OPACITY { v_opacity = MAX_V_OPACITY; }
+
         let mut obj = Self {
             numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
             buttons: Vec::new(),
@@ -38,7 +47,7 @@ impl Level {
             score: 0,
             timer: timer::Timer::new(2 * 60),
             btn_exit: Rectangle {
-                x: game.get_window_width() as f32 - 150.0 - 10.0, 
+                x: window_width as f32 - 150.0 - 10.0, 
                 y: 80.0, 
                 width: 150.0, 
                 height: 60.0, 
@@ -48,8 +57,8 @@ impl Level {
         for v_index in 0..V_COUNT {
             for h_index in 0..H_COUNT {
                 obj.buttons.push(Rectangle::new(
-                    100.0 + h_index as f32 * (RECTANGLE_WIDTH + H_OPACITY), 
-                    100.0 + v_index as f32 * (RECTANGLE_HEIGHT + V_OPACITY), 
+                    h_index as f32 * (RECTANGLE_WIDTH + h_opacity) + (window_width - H_COUNT as f32 * (RECTANGLE_WIDTH + h_opacity) + h_opacity) / 2.0, 
+                    v_index as f32 * (RECTANGLE_HEIGHT + v_opacity) + (window_height - V_COUNT as f32 * (RECTANGLE_HEIGHT + v_opacity) + v_opacity) / 2.0, 
                     RECTANGLE_WIDTH, 
                     RECTANGLE_HEIGHT
                 ));
@@ -91,6 +100,8 @@ impl Level {
                     game.set_state(game::GameState::Menu);
                     self.btn_exit_color = Color::WHITE;
                 }
+            } else {
+                self.btn_exit_color = Color::WHITE;
             }
 
             if self.correct_buttons.len() == (H_COUNT * V_COUNT) as usize {
@@ -130,6 +141,33 @@ impl Level {
                 }
             } else {
                 self.timer.activate();
+            }
+        }
+    }
+
+    pub fn update_btn_positions(&mut self, game: &game::Game) {
+        let window_width: f32 = game.get_window_width() as f32;
+        let window_height: f32 = game.get_window_height() as f32;
+        let mut h_opacity: f32 = (window_width - 600.0 - H_COUNT as f32 * RECTANGLE_WIDTH) / (H_COUNT - 1) as f32;
+        let mut v_opacity: f32 = (window_height - 600.0 - V_COUNT as f32 * RECTANGLE_HEIGHT) / (V_COUNT - 1) as f32;
+        let mut index;
+
+        if h_opacity > MAX_H_OPACITY {
+            h_opacity = MAX_H_OPACITY;
+        } else if h_opacity < MIN_H_OPACITY {
+            h_opacity = MIN_H_OPACITY;
+        }
+        if v_opacity > MAX_V_OPACITY {
+            v_opacity = MAX_V_OPACITY;
+        } else if v_opacity < MIN_V_OPACITY {
+            v_opacity = MIN_V_OPACITY;
+        }
+
+        for v_index in 0..V_COUNT {
+            for h_index in 0..H_COUNT {
+                index = (v_index * H_COUNT + h_index) as usize;
+                self.buttons[index].x = h_index as f32 * (RECTANGLE_WIDTH + h_opacity) + (window_width - H_COUNT as f32 * (RECTANGLE_WIDTH + h_opacity) + h_opacity) / 2.0;
+                self.buttons[index].y = v_index as f32 * (RECTANGLE_HEIGHT + v_opacity) + (window_height - V_COUNT as f32 * (RECTANGLE_HEIGHT + v_opacity) + v_opacity) / 2.0;
             }
         }
     }
@@ -175,13 +213,13 @@ impl Level {
     pub fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
             let text = format!("Your score  -  {0} points.", self.score);
-            draw_text_center(d, text.as_str(), 12, 36, Color::GREEN, &game);
+            draw_text_center(d, text.as_str(), 24, 36, Color::GREEN, &game);
         }
     }
 
     pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
-            let btn_text_width: i32 = d.measure_text("Exit", BTN_TEXT_FONTSIZE);
+            let btn_text_width: i32 = d.measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE);
             let btn_padding = Vector2::new(
                 self.btn_exit.x + (self.btn_exit.width - btn_text_width as f32) / 2.0, 
                 self.btn_exit.y + (self.btn_exit.height - BTN_TEXT_FONTSIZE as f32) / 2.0
@@ -192,7 +230,7 @@ impl Level {
             } else {
                 d.draw_rectangle_rec(self.btn_exit, self.btn_exit_color);
             }
-            d.draw_text("Exit", btn_padding.x as i32, btn_padding.y as i32, BTN_TEXT_FONTSIZE, Color::BLACK);
+            d.draw_text(BTN_EXIT_TEXT, btn_padding.x as i32, btn_padding.y as i32, BTN_TEXT_FONTSIZE, Color::BLACK);
         }
     }
 }

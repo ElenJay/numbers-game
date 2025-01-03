@@ -155,7 +155,7 @@ impl Menu {
                     }
                 }
                 if is_fullscreen_required {
-                    game.toggle_fullscreen(rl, self);
+                    game.toggle_fullscreen(rl, self, level);
                 }
             }
         }

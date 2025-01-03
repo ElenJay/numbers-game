@@ -1,7 +1,11 @@
+// ToDo: fix the attribute
+#![allow(dead_code)]
+
 use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
 
 use crate::menu::Menu;
+use crate::level::Level;
 
 const WINDOW_WIDTH: i32 = 1600;
 const WINDOW_HEIGHT: i32 = 900;
@@ -87,7 +91,7 @@ impl Game {
         self.settings.is_fps_visible = !self.settings.is_fps_visible;
     }
 
-    pub fn toggle_fullscreen(&mut self, rl: &mut RaylibHandle, menu: &mut Menu) {
+    pub fn toggle_fullscreen(&mut self, rl: &mut RaylibHandle, menu: &mut Menu, level: &mut Level) {
         self.settings.is_fullscreen = !self.settings.is_fullscreen;
 
         // Toggling fullscreen with borderless window mode requires order
@@ -106,13 +110,14 @@ impl Game {
 
         // Recalculate menu buttons positions
         menu.update_btn_positions(self);
+        level.update_btn_positions(self);
     }
 
-    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle, menu: &mut Menu) {
+    pub fn process_game_controller(&mut self, rl: &mut RaylibHandle, menu: &mut Menu, level: &mut Level) {
         rl.set_exit_key(None);
 
         if rl.is_key_released(KEY_F1) {
-            self.toggle_fullscreen(rl, menu);
+            self.toggle_fullscreen(rl, menu, level);
         }
 
         if rl.is_key_released(KEY_ESCAPE) {

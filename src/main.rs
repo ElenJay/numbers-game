@@ -58,10 +58,11 @@ fn main() {
             game.set_window_width(rl.get_screen_width());
             game.set_window_height(rl.get_screen_height());
             menu.update_btn_positions(&game);
+            level.update_btn_positions(&game);
         }
 
         // Process control
-        game.process_game_controller(&mut rl, &mut menu);
+        game.process_game_controller(&mut rl, &mut menu, &mut level);
         menu.process_menu_controller(&mut rl, &mut game, &mut level);
         level.process_level_controller(&rl, &mut game);
 
