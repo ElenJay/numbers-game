@@ -3,7 +3,6 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::level;
-use crate::utils::draw_text_center;
 
 const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
 const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;

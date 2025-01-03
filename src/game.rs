@@ -4,7 +4,7 @@
 use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
 
-use crate::menu::{Menu, MenuState};
+use crate::menu::{ Menu, MenuState };
 use crate::level::Level;
 
 const WINDOW_WIDTH: i32 = 1600;
@@ -25,6 +25,12 @@ pub enum GameState {
 }
 
 #[derive(Clone, Copy, PartialEq)]
+pub enum GameDifficulty {
+    Easy,
+    Hard,
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct GameSettings {
     is_fullscreen: bool,
     is_vsync: bool,
@@ -34,6 +40,7 @@ pub struct GameSettings {
 pub struct Game {
     mode: GameMode,
     state: GameState,
+    difficulty: GameDifficulty,
     settings: GameSettings,
     window_width: i32,
     window_height: i32,
@@ -46,6 +53,7 @@ impl Game {
         Self {
             mode: GameMode::Release,
             state: GameState::Menu,
+            difficulty: GameDifficulty::Hard,
             settings: GameSettings {
                 is_fullscreen: true,
                 is_vsync: true,
@@ -64,6 +72,14 @@ impl Game {
 
     pub fn set_state(&mut self, state: GameState) {
         self.state = state;
+    }
+
+    pub fn get_difficulty(&self) -> GameDifficulty {
+        self.difficulty
+    }
+
+    pub fn set_difficulty(&mut self, difficulty: GameDifficulty) {
+        self.difficulty = difficulty;
     }
 
     pub fn get_window_width(&self) -> i32 {

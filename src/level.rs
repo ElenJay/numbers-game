@@ -3,7 +3,7 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::timer;
-use crate::utils::{generate_numbers_array, draw_text_center};
+use crate::utils::{ generate_numbers_array, draw_text_center };
 
 const RECTANGLE_WIDTH: f32 = 100.0;
 const RECTANGLE_HEIGHT: f32 = 60.0;
@@ -38,6 +38,8 @@ impl Level {
         if h_opacity > MAX_H_OPACITY { h_opacity = MAX_H_OPACITY; }
         if v_opacity > MAX_V_OPACITY { v_opacity = MAX_V_OPACITY; }
 
+        let timer_duration: i32 = if game.get_difficulty() == game::GameDifficulty::Easy { 2 * 60 } else { 2 * 60 - 15 };
+
         let mut obj = Self {
             numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
             buttons: Vec::new(),
@@ -45,7 +47,7 @@ impl Level {
             incorrect_btn_index: -1,
             correct_buttons: Vec::new(),
             score: 0,
-            timer: timer::Timer::new(2 * 60),
+            timer: timer::Timer::new(timer_duration),
             btn_exit: Rectangle {
                 x: window_width as f32 - 150.0 - 10.0, 
                 y: 80.0, 
@@ -54,6 +56,7 @@ impl Level {
             },
             btn_exit_color: Color::WHITE,
         };
+
         for v_index in 0..V_COUNT {
             for h_index in 0..H_COUNT {
                 obj.buttons.push(Rectangle::new(
@@ -64,6 +67,7 @@ impl Level {
                 ));
             }
         }
+        
         obj
     }
 
@@ -177,6 +181,7 @@ impl Level {
             let mut text;
             let mut index: i32;
             let mut text_color: Color = Color::BLACK;
+            let is_easy_difficulty: bool = game.get_difficulty() == game::GameDifficulty::Easy;
 
             for (i, el) in self.buttons.iter().enumerate() {
                 index = i as i32;
@@ -187,8 +192,12 @@ impl Level {
                 );
 
                 if self.correct_buttons.contains(&index) {
-                    d.draw_rectangle_rec(el, Color::GREEN);
-                    text_color = Color::WHITE;
+                    if is_easy_difficulty {
+                        d.draw_rectangle_rec(el, Color::GREEN);
+                        text_color = Color::WHITE;
+                    } else {
+                        d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
+                    }
                 } else if self.incorrect_btn_index == index {
                     d.draw_rectangle_rec(el, Color::RED);
                     text_color = Color::WHITE;
