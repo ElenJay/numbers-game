@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use raylib::prelude::*;
 use raylib::core::texture::Image;
 use std::env;
