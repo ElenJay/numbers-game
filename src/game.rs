@@ -24,10 +24,16 @@ pub enum GameState {
     Lose,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum GameDifficulty {
     Easy,
     Hard,
+}
+
+impl std::fmt::Display for GameDifficulty {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Clone, Copy, PartialEq)]

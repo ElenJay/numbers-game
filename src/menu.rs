@@ -3,6 +3,7 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::level;
+use crate::utils::draw_text_center;
 
 const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
 const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
@@ -14,6 +15,7 @@ const BTN_CONTINUE_TEXT: &str = "Continue";
 const BTN_SETTINGS_TEXT: &str = "Settings";
 const BTN_HELP_TEXT: &str = "Help";
 const BTN_EXIT_TEXT: &str = "Exit";
+const BTN_DIFFICULTY_TEXT: &str = "Difficulty";
 const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
 const BTN_TOGGLE_FPS_TEXT: &str = "FPS counter";
 const BTN_BACK_TEXT: &str = "Back";
@@ -38,6 +40,7 @@ const HELP_BACK_TEXT: &str = "Press Esc button to go back to the menu...";
 // }
 
 // enum MENU_SETTINGS_ITEMS_TEXT {
+//     BTN_DIFFICULTY_TEXT,
 //     BTN_FULLSCREEN_TEXT,
 //     BTN_BACK_TEXT,
 // }
@@ -94,6 +97,7 @@ impl Menu {
             BTN_EXIT_TEXT.to_string(), 
         ];
         let settings_items_titles: Vec<String> = vec![
+            BTN_DIFFICULTY_TEXT.to_string(),
             BTN_FULLSCREEN_TEXT.to_string(), 
             BTN_TOGGLE_FPS_TEXT.to_string(), 
             BTN_BACK_TEXT.to_string(),
@@ -184,6 +188,14 @@ impl Menu {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                             match item.content.as_str() {
+                                BTN_DIFFICULTY_TEXT => {
+                                    let difficulty: game::GameDifficulty = game.get_difficulty();
+                                    if difficulty == game::GameDifficulty::Easy {
+                                        game.set_difficulty(game::GameDifficulty::Hard);
+                                    } else {
+                                        game.set_difficulty(game::GameDifficulty::Easy);
+                                    }
+                                },
                                 BTN_FULLSCREEN_TEXT => {
                                     is_fullscreen_required = true;
                                 },
@@ -226,6 +238,8 @@ impl Menu {
                 for item in self.settings_items.iter() {
                     self.draw_menu_button(d, &item.btn, item.content.as_str(), &item.color);
                 }
+                let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
+                draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() - 60, 40, Color::GREEN, &game)
             } else if self.state == MenuState::Help {
                 let text_length = d.measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20);
                 let x: i32 = (game.get_window_width() - text_length) / 2;
