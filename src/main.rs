@@ -24,10 +24,14 @@ fn main() {
         .resizable()
         .vsync()
         .build();
+    
+    // ToDo: test on Windows
+    let custom_font: Font = rl.load_font(&thread, "assets/fonts/arial.TTF").unwrap();
+    rl.gui_set_font(custom_font);
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon
-        rl.set_window_icon(Image::load_image("assets/icon.png").unwrap());
+        rl.set_window_icon(Image::load_image("assets/images/icon.png").unwrap());
     }
 
     update_window_sizes(&mut rl, &mut game);
@@ -49,6 +53,7 @@ fn main() {
         menu.draw(&mut d, &game);
         level.draw(&mut d, &game);
     }
+    // rl.unload_font(custom_font);
 }
 
 fn update_window_sizes(rl: &mut RaylibHandle, game: &mut Game) {
