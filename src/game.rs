@@ -27,6 +27,7 @@ pub enum GameState {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum GameDifficulty {
     Easy,
+    Medium,
     Hard,
 }
 
@@ -59,7 +60,7 @@ impl Game {
         Self {
             mode: GameMode::Release,
             state: GameState::Menu,
-            difficulty: GameDifficulty::Hard,
+            difficulty: GameDifficulty::Easy,
             settings: GameSettings {
                 is_fullscreen: true,
                 is_vsync: true,
@@ -84,8 +85,12 @@ impl Game {
         self.difficulty
     }
 
-    pub fn set_difficulty(&mut self, difficulty: GameDifficulty) {
-        self.difficulty = difficulty;
+    pub fn change_difficulty(&mut self, difficulty: GameDifficulty) {
+        match difficulty {
+            GameDifficulty::Easy => self.difficulty = GameDifficulty::Medium,
+            GameDifficulty::Medium => self.difficulty = GameDifficulty::Hard,
+            GameDifficulty::Hard => self.difficulty = GameDifficulty::Easy,
+        }
     }
 
     pub fn get_window_width(&self) -> i32 {

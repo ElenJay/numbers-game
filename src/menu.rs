@@ -176,7 +176,7 @@ impl Menu {
                                 _ => {},
                             }
                         }
-                    } else {
+                    } else if item.color != Color::LIGHTGRAY {
                         item.color = Color::LIGHTGRAY;
                     }
                 }
@@ -189,12 +189,7 @@ impl Menu {
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                             match item.content.as_str() {
                                 BTN_DIFFICULTY_TEXT => {
-                                    let difficulty: game::GameDifficulty = game.get_difficulty();
-                                    if difficulty == game::GameDifficulty::Easy {
-                                        game.set_difficulty(game::GameDifficulty::Hard);
-                                    } else {
-                                        game.set_difficulty(game::GameDifficulty::Easy);
-                                    }
+                                    game.change_difficulty(game.get_difficulty());
                                 },
                                 BTN_FULLSCREEN_TEXT => {
                                     is_fullscreen_required = true;
@@ -208,7 +203,7 @@ impl Menu {
                                 _ => {},
                             }
                         }
-                    } else {
+                    } else if item.color != Color::LIGHTGRAY {
                         item.color = Color::LIGHTGRAY;
                     }
                 }
