@@ -184,15 +184,18 @@ impl Level {
             let mut text;
             let mut index: i32;
             let mut text_color: Color = Color::BLACK;
+            let mut text_sizes: Vector2;
+            let mut text_padding: Vector2;
             let is_easy_difficulty: bool = game.get_difficulty() == game::GameDifficulty::Easy;
 
             for (i, el) in self.buttons.iter().enumerate() {
                 index = i as i32;
                 text = format!("{0}", self.numbers[i]);
-                let text_padding = Vector2::new(
-                    el.x + (RECTANGLE_WIDTH - d.measure_text(&text, 48) as f32) / 2.0, 
-                    el.y + (RECTANGLE_HEIGHT - 48.0) / 2.0
-                );
+                text_sizes = game.get_font().measure_text(&text, 48.0, game.get_font_spacing());
+                text_padding = Vector2 {
+                    x: el.x + (RECTANGLE_WIDTH - text_sizes.x) / 2.0, 
+                    y: el.y + (RECTANGLE_HEIGHT - text_sizes.y) / 2.0
+                };
 
                 if self.correct_buttons.contains(&index) {
                     if is_easy_difficulty {
@@ -231,11 +234,11 @@ impl Level {
 
     pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
-            let btn_text_width: i32 = d.measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE as i32);
-            let btn_padding = Vector2::new(
-                self.btn_exit.x + (self.btn_exit.width - btn_text_width as f32) / 2.0, 
-                self.btn_exit.y + (self.btn_exit.height - BTN_TEXT_FONTSIZE) / 2.0
-            );
+            let btn_text_sizes: Vector2 = game.get_font().measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE, game.get_font_spacing());
+            let btn_padding = Vector2 {
+                x: self.btn_exit.x + (self.btn_exit.width - btn_text_sizes.x) / 2.0, 
+                y: self.btn_exit.y + (self.btn_exit.height - btn_text_sizes.y) / 2.0
+            };
 
             if self.btn_exit_color == Color::WHITE {
                 d.draw_rectangle_lines_ex(self.btn_exit, 1.0, Color::BLACK);
