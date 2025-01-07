@@ -15,19 +15,18 @@ use menu::Menu;
 use level::Level;
 
 fn main() {
-    let mut game = Game::new();
-
     // Init window
     let (mut rl, thread) = raylib::init()
-        .size(game.get_window_width(), game.get_window_height())
+        .size(Game::DEFAULT_WINDOW_WIDTH, Game::DEFAULT_WINDOW_HEIGHT)
         .title("Numbers Game")
         .resizable()
         .vsync()
         .build();
+
+    let mut game = Game::new(&mut rl, &thread);
     
     // ToDo: add global spicing 5.0 if font wasn't loaded
     // ToDo: add support of cyrillic symbols
-    let custom_font: Font = rl.load_font_ex(&thread, "assets/fonts/custom-font.otf", 200, None).unwrap();
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon
@@ -50,8 +49,8 @@ fn main() {
         d.clear_background(Color::WHITE);
 
         game.draw(&mut d);
-        menu.draw(&mut d, &custom_font, &game);
-        level.draw(&mut d, &custom_font, &game);
+        menu.draw(&mut d, &game);
+        level.draw(&mut d, &game);
     }
 }
 

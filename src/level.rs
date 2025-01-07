@@ -179,7 +179,7 @@ impl Level {
         }
     }
 
-    pub fn draw_level(&self, d: &mut RaylibDrawHandle, font: &Font, game: &game::Game) {
+    pub fn draw_level(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
             let mut text;
             let mut index: i32;
@@ -209,27 +209,27 @@ impl Level {
                 } else {
                     d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
                 }
-                d.draw_text_ex(font, &text, text_padding, 48.0, 1.0, text_color);
+                d.draw_text_ex(game.get_font(), &text, text_padding, 48.0, 1.0, text_color);
                 text_color = Color::BLACK;
             }
 
-            self.timer.draw(d, &font, &game);
+            self.timer.draw(d, &game);
         } else if game.get_state() == game::GameState::Win {
-            draw_text_center(d, &font, "Congratulations. You win!!!", game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::GREEN, &game)
+            draw_text_center(d, "Congratulations. You win!!!", game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::GREEN, &game)
         } else if game.get_state() == game::GameState::Lose {
             let lose_text = format!("Sorry. You lose with score: {0} points.", self.score);
-            draw_text_center(d, &font, lose_text.as_str(), game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::RED, &game)
+            draw_text_center(d, lose_text.as_str(), game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::RED, &game)
         }
     }
 
-    pub fn draw_score(&self, d: &mut RaylibDrawHandle, font: &Font, game: &game::Game) {
+    pub fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
             let text = format!("Your score  -  {0} points.", self.score);
-            draw_text_center(d, &font, text.as_str(), 24.0, 36.0, Color::GREEN, &game);
+            draw_text_center(d, text.as_str(), 24.0, 36.0, Color::GREEN, &game);
         }
     }
 
-    pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, font: &Font, game: &game::Game) {
+    pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
             let btn_text_width: i32 = d.measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE as i32);
             let btn_padding = Vector2::new(
@@ -242,13 +242,13 @@ impl Level {
             } else {
                 d.draw_rectangle_rec(self.btn_exit, self.btn_exit_color);
             }
-            d.draw_text_ex(font, BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, 1.0, Color::BLACK);
+            d.draw_text_ex(game.get_font(), BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, 1.0, Color::BLACK);
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, font: &Font, game: &game::Game) {
-        self.draw_level(d, &font, &game);
-        self.draw_score(d, &font, &game);
-        self.draw_exit_button(d, &font, &game);
+    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        self.draw_level(d, &game);
+        self.draw_score(d, &game);
+        self.draw_exit_button(d, &game);
     }
 }

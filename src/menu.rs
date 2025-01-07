@@ -223,45 +223,45 @@ impl Menu {
         d.draw_text_ex(font, btn_text, btn_padding, DEFAULT_MENU_ITEM_FONT_SIZE, 1.0, Color::BLACK);
     }
 
-    fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game, font: &Font) {
+    fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter() {
-                    self.draw_menu_button(d, &font, &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, game.get_font(), &item.btn, item.content.as_str(), &item.color);
                 }
             } else if self.state == MenuState::Settings {
                 for item in self.settings_items.iter() {
-                    self.draw_menu_button(d, &font, &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, game.get_font(), &item.btn, item.content.as_str(), &item.color);
                 }
                 let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
-                draw_text_center(d, &font, game_difficulty_text.as_str(), game.get_window_height() as f32 - 60.0, 40.0, Color::GREEN, &game)
+                draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() as f32 - 60.0, 40.0, Color::GREEN, &game)
             } else if self.state == MenuState::Help {
                 let text_length = d.measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20);
                 let x: f32 = (game.get_window_width() - text_length) as f32 / 2.0;
                 let mut y: f32 = (game.get_window_height() - (100 + 64 * 3 + 36 * 4 + 32)) as f32 / 2.0;
 
-                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
                 y += 64.0;
-                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
                 y += 64.0;
-                d.draw_text_ex(font, HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
                 y += 64.0;
-                d.draw_text_ex(font, HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(font, HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(font, HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
                 y += 100.0;
-                d.draw_text_ex(font, HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
             }
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, font: &Font, game: &game::Game) {
-        self.draw_menu(d, game, font);
+    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        self.draw_menu(d, game);
     }
 }

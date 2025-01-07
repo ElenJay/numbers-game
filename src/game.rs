@@ -7,9 +7,6 @@ use raylib::consts::KeyboardKey::*;
 use crate::menu::{ Menu, MenuState };
 use crate::level::Level;
 
-const WINDOW_WIDTH: i32 = 1600;
-const WINDOW_HEIGHT: i32 = 900;
-
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
     // Debug,
@@ -49,6 +46,7 @@ pub struct Game {
     state: GameState,
     difficulty: GameDifficulty,
     settings: GameSettings,
+    font: Font,
     window_width: i32,
     window_height: i32,
     fullscreen_width: i32,
@@ -56,7 +54,10 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new() -> Self {
+    pub const DEFAULT_WINDOW_WIDTH: i32 = 1600;
+    pub const DEFAULT_WINDOW_HEIGHT: i32 = 900;
+
+    pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread) -> Self {
         Self {
             mode: GameMode::Release,
             state: GameState::Menu,
@@ -66,8 +67,9 @@ impl Game {
                 is_vsync: true,
                 is_fps_visible: false,
             },
-            window_width: WINDOW_WIDTH,
-            window_height: WINDOW_HEIGHT,
+            font: rl.load_font_ex(&thread, "assets/fonts/custom-font.otf", 200, None).unwrap(),
+            window_width: Self::DEFAULT_WINDOW_WIDTH,
+            window_height: Self::DEFAULT_WINDOW_HEIGHT,
             fullscreen_width: 0,
             fullscreen_height: 0,
         }
@@ -91,6 +93,10 @@ impl Game {
             GameDifficulty::Medium => self.difficulty = GameDifficulty::Hard,
             GameDifficulty::Hard => self.difficulty = GameDifficulty::Easy,
         }
+    }
+
+    pub fn get_font(&self) -> &Font {
+        &self.font
     }
 
     pub fn get_window_width(&self) -> i32 {
