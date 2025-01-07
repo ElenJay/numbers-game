@@ -41,12 +41,17 @@ pub struct GameSettings {
     is_fps_visible: bool,
 }
 
+pub struct GameFont {
+    font: Font, 
+    spacing: f32,
+}
+
 pub struct Game {
     mode: GameMode,
     state: GameState,
     difficulty: GameDifficulty,
     settings: GameSettings,
-    font: Font,
+    game_font: GameFont,
     window_width: i32,
     window_height: i32,
     fullscreen_width: i32,
@@ -56,8 +61,14 @@ pub struct Game {
 impl Game {
     pub const DEFAULT_WINDOW_WIDTH: i32 = 1600;
     pub const DEFAULT_WINDOW_HEIGHT: i32 = 900;
+    pub const CUSTOM_FONT_PATH: &str = "assets/fonts/custom-font.otf";
 
     pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread) -> Self {
+        let spacing: f32 = match std::fs::File::open(Self::CUSTOM_FONT_PATH) {
+            Ok(_) => 1.0,
+            Err(_) => 5.0,
+        };
+
         Self {
             mode: GameMode::Release,
             state: GameState::Menu,
@@ -67,7 +78,10 @@ impl Game {
                 is_vsync: true,
                 is_fps_visible: false,
             },
-            font: rl.load_font_ex(&thread, "assets/fonts/custom-font.otf", 200, None).unwrap(),
+            game_font: GameFont {
+                font: rl.load_font_ex(&thread, Self::CUSTOM_FONT_PATH, 200, None).unwrap(), 
+                spacing: spacing 
+            },
             window_width: Self::DEFAULT_WINDOW_WIDTH,
             window_height: Self::DEFAULT_WINDOW_HEIGHT,
             fullscreen_width: 0,
@@ -96,7 +110,11 @@ impl Game {
     }
 
     pub fn get_font(&self) -> &Font {
-        &self.font
+        &self.game_font.font
+    }
+
+    pub fn get_font_spacing(&self) -> f32 {
+        self.game_font.spacing
     }
 
     pub fn get_window_width(&self) -> i32 {

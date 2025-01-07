@@ -214,24 +214,24 @@ impl Menu {
         }
     }
 
-    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, font: &Font, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
+    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, game: &game::Game, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
         d.draw_rectangle_rec(btn, btn_color);
         let btn_padding = Vector2::new(
             btn.x + (btn.width - d.measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE as i32) as f32) / 2.0, 
             btn.y + (btn.height - DEFAULT_MENU_ITEM_FONT_SIZE) / 2.0
         );
-        d.draw_text_ex(font, btn_text, btn_padding, DEFAULT_MENU_ITEM_FONT_SIZE, 1.0, Color::BLACK);
+        d.draw_text_ex(game.get_font(), btn_text, btn_padding, DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing(), Color::BLACK);
     }
 
     fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter() {
-                    self.draw_menu_button(d, game.get_font(), &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, &game, &item.btn, item.content.as_str(), &item.color);
                 }
             } else if self.state == MenuState::Settings {
                 for item in self.settings_items.iter() {
-                    self.draw_menu_button(d, game.get_font(), &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, &game, &item.btn, item.content.as_str(), &item.color);
                 }
                 let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
                 draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() as f32 - 60.0, 40.0, Color::GREEN, &game)
@@ -240,23 +240,23 @@ impl Menu {
                 let x: f32 = (game.get_window_width() - text_length) as f32 / 2.0;
                 let mut y: f32 = (game.get_window_height() - (100 + 64 * 3 + 36 * 4 + 32)) as f32 / 2.0;
 
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
                 y += 64.0;
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
                 y += 64.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
                 y += 64.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
                 y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
                 y += 100.0;
-                d.draw_text_ex(game.get_font(), HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                d.draw_text_ex(game.get_font(), HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
             }
         }
     }

@@ -209,7 +209,7 @@ impl Level {
                 } else {
                     d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
                 }
-                d.draw_text_ex(game.get_font(), &text, text_padding, 48.0, 1.0, text_color);
+                d.draw_text_ex(game.get_font(), &text, text_padding, 48.0, game.get_font_spacing(), text_color);
                 text_color = Color::BLACK;
             }
 
@@ -242,7 +242,7 @@ impl Level {
             } else {
                 d.draw_rectangle_rec(self.btn_exit, self.btn_exit_color);
             }
-            d.draw_text_ex(game.get_font(), BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, 1.0, Color::BLACK);
+            d.draw_text_ex(game.get_font(), BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
         }
     }
 
