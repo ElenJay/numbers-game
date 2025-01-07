@@ -8,7 +8,7 @@ use crate::utils::draw_text_center;
 const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
 const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
 const DEFAULT_MENU_ITEMS_DIFF: f32 = DEFAULT_MENU_ITEM_HEIGHT / 2.0;
-const DEFAULT_MENU_ITEM_FONT_SIZE: i32 = 54;
+const DEFAULT_MENU_ITEM_FONT_SIZE: f32 = 54.0;
 
 const BTN_START_TEXT: &str = "Start";
 const BTN_CONTINUE_TEXT: &str = "Continue";
@@ -214,54 +214,54 @@ impl Menu {
         }
     }
 
-    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
+    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, font: &Font, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
         d.draw_rectangle_rec(btn, btn_color);
         let btn_padding = Vector2::new(
-            btn.x + (btn.width - d.measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE) as f32) / 2.0, 
-            btn.y + (btn.height - DEFAULT_MENU_ITEM_FONT_SIZE as f32) / 2.0
+            btn.x + (btn.width - d.measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE as i32) as f32) / 2.0, 
+            btn.y + (btn.height - DEFAULT_MENU_ITEM_FONT_SIZE) / 2.0
         );
-        d.draw_text(btn_text, btn_padding.x as i32, btn_padding.y as i32, DEFAULT_MENU_ITEM_FONT_SIZE, Color::BLACK);
+        d.draw_text_ex(font, btn_text, btn_padding, DEFAULT_MENU_ITEM_FONT_SIZE, 1.0, Color::BLACK);
     }
 
-    fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+    fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game, font: &Font) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter() {
-                    self.draw_menu_button(d, &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, &font, &item.btn, item.content.as_str(), &item.color);
                 }
             } else if self.state == MenuState::Settings {
                 for item in self.settings_items.iter() {
-                    self.draw_menu_button(d, &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, &font, &item.btn, item.content.as_str(), &item.color);
                 }
                 let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
-                draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() - 60, 40, Color::GREEN, &game)
+                draw_text_center(d, &font, game_difficulty_text.as_str(), game.get_window_height() as f32 - 60.0, 40.0, Color::GREEN, &game)
             } else if self.state == MenuState::Help {
                 let text_length = d.measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20);
-                let x: i32 = (game.get_window_width() - text_length) / 2;
-                let mut y: i32 = (game.get_window_height() - (100 + 64 * 3 + 36 * 4 + 32)) / 2;
+                let x: f32 = (game.get_window_width() - text_length) as f32 / 2.0;
+                let mut y: f32 = (game.get_window_height() - (100 + 64 * 3 + 36 * 4 + 32)) as f32 / 2.0;
 
-                d.draw_text(HELP_HOW_TO_PLAY_TEXT, x, y, 32, Color::BLACK);
-                y += 64;
-                d.draw_text(HELP_HOW_TO_PLAY_TEXT_1, x, y, 24, Color::BLACK);
-                y += 36;
-                d.draw_text(HELP_HOW_TO_PLAY_TEXT_2, x, y, 24, Color::BLACK);
-                y += 36;
-                d.draw_text(HELP_HOW_TO_PLAY_TEXT_3, x, y, 24, Color::BLACK);
-                y += 64;
-                d.draw_text(HELP_TIPS_TEXT, x, y, 32, Color::BLACK);
-                y += 64;
-                d.draw_text(HELP_TIPS_TEXT_1, x, y, 24, Color::BLACK);
-                y += 36;
-                d.draw_text(HELP_TIPS_TEXT_2, x, y, 24, Color::BLACK);
-                y += 36;
-                d.draw_text(HELP_TIPS_TEXT_3, x, y, 24, Color::BLACK);
-                y += 100;
-                d.draw_text(HELP_BACK_TEXT, x, y, 32, Color::BLACK);
+                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                y += 64.0;
+                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                y += 36.0;
+                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                y += 36.0;
+                d.draw_text_ex(font, HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                y += 64.0;
+                d.draw_text_ex(font, HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
+                y += 64.0;
+                d.draw_text_ex(font, HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                y += 36.0;
+                d.draw_text_ex(font, HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                y += 36.0;
+                d.draw_text_ex(font, HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, 1.0, Color::BLACK);
+                y += 100.0;
+                d.draw_text_ex(font, HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, 1.0, Color::BLACK);
             }
         }
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        self.draw_menu(d, game);
+    pub fn draw(&self, d: &mut RaylibDrawHandle, font: &Font, game: &game::Game) {
+        self.draw_menu(d, game, font);
     }
 }

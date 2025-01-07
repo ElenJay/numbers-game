@@ -16,6 +16,10 @@ Build dependencies with `cargo build`, and then run with `cargo run`.
 * Score system;
 * Continue game *(if you want to make a pause)*;
 
+### Font
+
+Lemon Milk (Light)
+
 ## Screenshots
 
 ### Menu

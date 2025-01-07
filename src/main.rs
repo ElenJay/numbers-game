@@ -25,9 +25,9 @@ fn main() {
         .vsync()
         .build();
     
-    // ToDo: test on Windows
-    let custom_font: Font = rl.load_font(&thread, "assets/fonts/arial.TTF").unwrap();
-    rl.gui_set_font(custom_font);
+    // ToDo: add global spicing 5.0 if font wasn't loaded
+    // ToDo: add support of cyrillic symbols
+    let custom_font: Font = rl.load_font_ex(&thread, "assets/fonts/custom-font.otf", 200, None).unwrap();
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon
@@ -50,10 +50,9 @@ fn main() {
         d.clear_background(Color::WHITE);
 
         game.draw(&mut d);
-        menu.draw(&mut d, &game);
-        level.draw(&mut d, &game);
+        menu.draw(&mut d, &custom_font, &game);
+        level.draw(&mut d, &custom_font, &game);
     }
-    // rl.unload_font(custom_font);
 }
 
 fn update_window_sizes(rl: &mut RaylibHandle, game: &mut Game) {
