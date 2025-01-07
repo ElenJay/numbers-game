@@ -24,6 +24,7 @@ pub struct Level {
     incorrect_btn_index: i32,
     correct_buttons: Vec<i32>,
     score: i32,
+    fails: i32,
     timer: timer::Timer,
     btn_exit: Rectangle,
     btn_exit_color: Color,
@@ -45,6 +46,7 @@ impl Level {
             incorrect_btn_index: -1,
             correct_buttons: Vec::new(),
             score: 0,
+            fails: 0,
             timer: timer::Timer::new(Self::get_timer_duration(game)),
             btn_exit: Rectangle {
                 x: window_width as f32 - 150.0 - 10.0, 
@@ -70,7 +72,11 @@ impl Level {
     }
 
     fn get_timer_duration(game: &game::Game) -> i32 {
-        if game.get_difficulty() == game::GameDifficulty::Easy { 2 * 60 } else { 2 * 60 - 15 }
+        match game.get_difficulty() {
+            game::GameDifficulty::Easy => 3 * 60,
+            game::GameDifficulty::Medium => 2 * 60,
+            game::GameDifficulty::Hard => 2 * 60,
+        }
     }
 
     pub fn is_started(&self) -> bool {
@@ -136,6 +142,9 @@ impl Level {
                                 self.incorrect_btn_index = -1;
                                 self.score += 1;
                             } else {
+                                if self.incorrect_btn_index != -1 {
+                                    self.fails += 1;
+                                }
                                 self.incorrect_btn_index = index;
                             }
                             self.active_btn_index = -1;
@@ -186,7 +195,7 @@ impl Level {
             let mut text_color: Color = Color::BLACK;
             let mut text_sizes: Vector2;
             let mut text_padding: Vector2;
-            let is_easy_difficulty: bool = game.get_difficulty() == game::GameDifficulty::Easy;
+            let is_hard_difficulty: bool = game.get_difficulty() == game::GameDifficulty::Hard;
 
             for (i, el) in self.buttons.iter().enumerate() {
                 index = i as i32;
@@ -198,11 +207,11 @@ impl Level {
                 };
 
                 if self.correct_buttons.contains(&index) {
-                    if is_easy_difficulty {
+                    if is_hard_difficulty {
+                        d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
+                    } else {
                         d.draw_rectangle_rec(el, Color::GREEN);
                         text_color = Color::WHITE;
-                    } else {
-                        d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
                     }
                 } else if self.incorrect_btn_index == index {
                     d.draw_rectangle_rec(el, Color::RED);
@@ -220,7 +229,7 @@ impl Level {
         } else if game.get_state() == game::GameState::Win {
             draw_text_center(d, "Congratulations. You win!!!", game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::GREEN, &game)
         } else if game.get_state() == game::GameState::Lose {
-            let lose_text = format!("Sorry. You lose with score: {0} points.", self.score);
+            let lose_text = format!("Sorry. You lose with score: {0} points (and {1} fails).", self.score, self.fails);
             draw_text_center(d, lose_text.as_str(), game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::RED, &game)
         }
     }
