@@ -90,8 +90,8 @@ impl Menu {
     }
 
     pub fn new(game: &game::Game) -> Self {
-        let window_width: f32 = game.get_window_width() as f32;
-        let window_height: f32 = game.get_window_height() as f32;
+        let window_width: f32 = game.get_window_width();
+        let window_height: f32 = game.get_window_height();
 
         let items_titles: Vec<MenuAllItems> = vec![
             MenuAllItems::Start, 
@@ -123,8 +123,8 @@ impl Menu {
     }
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {
-        let window_width: f32 = game.get_window_width() as f32;
-        let window_height: f32 = game.get_window_height() as f32;
+        let window_width: f32 = game.get_window_width();
+        let window_height: f32 = game.get_window_height();
 
         let items_length: f32 = self.items.len() as f32;
         let settings_items_length: f32 = self.settings_items.len() as f32;
@@ -163,7 +163,7 @@ impl Menu {
                             match item.content {
                                 MenuAllItems::Start => {
                                     game.set_state(game::GameState::Game);
-                                    level.restart(game);
+                                    level.start(game);
                                 },
                                 MenuAllItems::Continue => {
                                     level.resume(game);
@@ -239,11 +239,11 @@ impl Menu {
                     self.draw_menu_button(d, &game, &item.btn, item.content.value(), &item.color);
                 }
                 let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
-                draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() as f32 - 60.0, 40.0, Color::GREEN, &game)
+                draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() - 60.0, 40.0, Color::GREEN, &game)
             } else if self.state == MenuState::Help {
                 let text_sizes: Vector2 = game.get_font().measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20.0, game.get_font_spacing());
-                let x: f32 = (game.get_window_width() as f32 - text_sizes.x) / 2.0;
-                let mut y: f32 = (game.get_window_height() - (100 + 64 * 3 + 36 * 4 + 32)) as f32 / 2.0;
+                let x: f32 = (game.get_window_width() - text_sizes.x) / 2.0;
+                let mut y: f32 = (game.get_window_height() - (100.0 + 64.0 * 3.0 + 36.0 * 4.0 + 32.0)) / 2.0;
 
                 d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
                 y += 64.0;

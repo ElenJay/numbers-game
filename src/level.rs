@@ -3,7 +3,7 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::timer;
-use crate::utils::{ generate_numbers_array, draw_text_center };
+use crate::utils::{ generate_numbers_array, draw_text_center, Button };
 
 const RECTANGLE_WIDTH: f32 = 100.0;
 const RECTANGLE_HEIGHT: f32 = 60.0;
@@ -14,6 +14,7 @@ const MIN_V_OPACITY: f32 = 20.0;
 const H_COUNT: i32 = 8;
 const V_COUNT: i32 = 7;
 
+const BTN_TRY_AGAIN_TEXT: &str = "Try Again";
 const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_TEXT_FONTSIZE: f32 = 48.0;
 
@@ -26,14 +27,15 @@ pub struct Level {
     score: i32,
     fails: i32,
     timer: timer::Timer,
-    btn_exit: Rectangle,
-    btn_exit_color: Color,
+    btn_game_exit: Button,
+    btn_after_game_try_again: Button,
+    btn_after_game_exit: Button,
 }
 
 impl Level {
     pub fn new(game: &game::Game) -> Self {
-        let window_width: f32 = game.get_window_width() as f32;
-        let window_height: f32 = game.get_window_height() as f32;
+        let window_width: f32 = game.get_window_width();
+        let window_height: f32 = game.get_window_height();
         let mut h_opacity: f32 = (window_width - 600.0 - H_COUNT as f32 * RECTANGLE_WIDTH) / (H_COUNT - 1) as f32;
         let mut v_opacity: f32 = (window_height - 600.0 - V_COUNT as f32 * RECTANGLE_HEIGHT) / (V_COUNT - 1) as f32;
         if h_opacity > MAX_H_OPACITY { h_opacity = MAX_H_OPACITY; }
@@ -48,13 +50,24 @@ impl Level {
             score: 0,
             fails: 0,
             timer: timer::Timer::new(Self::get_timer_duration(game)),
-            btn_exit: Rectangle {
-                x: window_width as f32 - 150.0 - 10.0, 
+            btn_game_exit: Button::new(Rectangle {
+                x: window_width - 150.0 - 10.0, 
                 y: 80.0, 
                 width: 150.0, 
                 height: 60.0, 
-            },
-            btn_exit_color: Color::WHITE,
+            }, BTN_EXIT_TEXT, Color::WHITE),
+            btn_after_game_try_again: Button::new(Rectangle {
+                x: window_width / 2.0 - 250.0, 
+                y: window_height / 2.0 + 100.0, 
+                width: 250.0, 
+                height: 60.0, 
+            }, BTN_TRY_AGAIN_TEXT, Color::WHITE),
+            btn_after_game_exit: Button::new(Rectangle {
+                x: window_width / 2.0 + 50.0, 
+                y: window_height / 2.0 + 100.0, 
+                width: 150.0, 
+                height: 60.0, 
+            }, BTN_EXIT_TEXT, Color::WHITE),
         };
 
         for v_index in 0..V_COUNT {
@@ -72,11 +85,19 @@ impl Level {
     }
 
     fn get_timer_duration(game: &game::Game) -> i32 {
-        match game.get_difficulty() {
-            game::GameDifficulty::Easy => 3 * 60,
-            game::GameDifficulty::Medium => 2 * 60,
-            game::GameDifficulty::Hard => 2 * 60,
-        }
+        if game.get_mode() == game::GameMode::Release {
+            match game.get_difficulty() {
+                game::GameDifficulty::Easy => 3 * 60,
+                game::GameDifficulty::Medium => 2 * 60,
+                game::GameDifficulty::Hard => 2 * 60,
+            }
+        } else if game.get_mode() == game::GameMode::Debug {
+            match game.get_difficulty() {
+                game::GameDifficulty::Easy => 3 * 60,
+                game::GameDifficulty::Medium => 60,
+                game::GameDifficulty::Hard => 10,
+            }
+        } else { 0 }
     }
 
     pub fn is_started(&self) -> bool {
@@ -88,8 +109,17 @@ impl Level {
         self.timer.resume();
     }
 
-    pub fn restart(&mut self, game: &game::Game) {
+    pub fn start(&mut self, game: &game::Game) {
         self.numbers = generate_numbers_array(H_COUNT * V_COUNT);
+        self.active_btn_index = -1;
+        self.incorrect_btn_index = -1;
+        self.correct_buttons.clear();
+        self.score = 0;
+        self.timer = timer::Timer::new(Self::get_timer_duration(game));
+        self.timer.start();
+    }
+
+    pub fn restart(&mut self, game: &game::Game) {
         self.active_btn_index = -1;
         self.incorrect_btn_index = -1;
         self.correct_buttons.clear();
@@ -99,22 +129,23 @@ impl Level {
     }
     
     pub fn process_controller(&mut self, rl: &RaylibHandle, game: &mut game::Game) {
+        let mouse_pos: Vector2 = rl.get_mouse_position();
+
         if game.get_state() == game::GameState::Menu && self.is_started() {
             self.timer.pause();
         }
         if game.get_state() == game::GameState::Game {
-            let mouse_pos: Vector2 = rl.get_mouse_position();
             let mut has_collision: bool = false;
             let mut index: i32;
 
-            if self.btn_exit.check_collision_point_rec(mouse_pos) {
-                self.btn_exit_color = Color::LIGHTGREEN;
+            if self.btn_game_exit.get_rec().check_collision_point_rec(mouse_pos) {
+                self.btn_game_exit.set_color(Color::LIGHTGREEN);
                 if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                     game.set_state(game::GameState::Menu);
-                    self.btn_exit_color = Color::WHITE;
+                    self.btn_game_exit.set_color(Color::WHITE);
                 }
             } else {
-                self.btn_exit_color = Color::WHITE;
+                self.btn_game_exit.set_color(Color::WHITE);
             }
 
             if self.correct_buttons.len() == (H_COUNT * V_COUNT) as usize {
@@ -158,12 +189,33 @@ impl Level {
             } else {
                 self.timer.activate();
             }
+        } else if game.get_state() == game::GameState::Win || game.get_state() == game::GameState::Lose {
+            if self.btn_after_game_try_again.get_rec().check_collision_point_rec(mouse_pos) {
+                self.btn_after_game_try_again.set_color(Color::LIGHTGREEN);
+                if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                    self.btn_after_game_try_again.set_color(Color::WHITE);
+                    game.set_state(game::GameState::Game);
+                    self.restart(game);
+                }
+            } else {
+                self.btn_after_game_try_again.set_color(Color::WHITE);
+            }
+
+            if self.btn_after_game_exit.get_rec().check_collision_point_rec(mouse_pos) {
+                self.btn_after_game_exit.set_color(Color::LIGHTGREEN);
+                if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
+                    game.set_state(game::GameState::Menu);
+                    self.btn_after_game_exit.set_color(Color::WHITE);
+                }
+            } else {
+                self.btn_after_game_exit.set_color(Color::WHITE);
+            }
         }
     }
 
     pub fn update_btn_positions(&mut self, game: &game::Game) {
-        let window_width: f32 = game.get_window_width() as f32;
-        let window_height: f32 = game.get_window_height() as f32;
+        let window_width: f32 = game.get_window_width();
+        let window_height: f32 = game.get_window_height();
         let mut h_opacity: f32 = (window_width - 600.0 - H_COUNT as f32 * RECTANGLE_WIDTH) / (H_COUNT - 1) as f32;
         let mut v_opacity: f32 = (window_height - 600.0 - V_COUNT as f32 * RECTANGLE_HEIGHT) / (V_COUNT - 1) as f32;
         let mut index: usize;
@@ -188,79 +240,105 @@ impl Level {
         }
     }
 
-    pub fn draw_level(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
-            let mut text: String;
-            let mut index: i32;
-            let mut text_color: Color = Color::BLACK;
-            let mut text_sizes: Vector2;
-            let mut text_padding: Vector2;
-            let is_hard_difficulty: bool = game.get_difficulty() == game::GameDifficulty::Hard;
-
-            for (i, el) in self.buttons.iter().enumerate() {
-                index = i as i32;
-                text = format!("{0}", self.numbers[i]);
-                text_sizes = game.get_font().measure_text(&text, 48.0, game.get_font_spacing());
-                text_padding = Vector2 {
-                    x: el.x + (RECTANGLE_WIDTH - text_sizes.x) / 2.0, 
-                    y: el.y + (RECTANGLE_HEIGHT - text_sizes.y) / 2.0
-                };
-
-                if self.correct_buttons.contains(&index) {
-                    if is_hard_difficulty {
-                        d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
-                    } else {
-                        d.draw_rectangle_rec(el, Color::GREEN);
-                        text_color = Color::WHITE;
-                    }
-                } else if self.incorrect_btn_index == index {
-                    d.draw_rectangle_rec(el, Color::RED);
-                    text_color = Color::WHITE;
-                } else if self.active_btn_index == index {
-                    d.draw_rectangle_rec(el, Color::LIGHTGREEN);
-                } else {
-                    d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
-                }
-                d.draw_text_ex(game.get_font(), &text, text_padding, 48.0, game.get_font_spacing(), text_color);
-                text_color = Color::BLACK;
-            }
-
-            self.timer.draw(d, &game);
+            self.draw_game(d, game);
+            self.draw_score(d, &game);
+            self.draw_game_exit_button(d, &game);
         } else if game.get_state() == game::GameState::Win {
-            draw_text_center(d, "Congratulations. You win!!!", game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::GREEN, &game)
+            self.draw_win(d, game);
         } else if game.get_state() == game::GameState::Lose {
-            let lose_text: String = format!("Sorry. You lose with score: {0} points (and {1} fails).", self.score, self.fails);
-            draw_text_center(d, lose_text.as_str(), game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::RED, &game)
+            self.draw_lose(d, game);
         }
     }
 
-    pub fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        if game.get_state() == game::GameState::Game {
-            let text: String = format!("Your score  -  {0} points.", self.score);
-            draw_text_center(d, text.as_str(), 24.0, 36.0, Color::GREEN, &game);
-        }
-    }
+    fn draw_game(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        let mut text: String;
+        let mut index: i32;
+        let mut text_color: Color = Color::BLACK;
+        let mut text_sizes: Vector2;
+        let mut text_padding: Vector2;
+        let is_hard_difficulty: bool = game.get_difficulty() == game::GameDifficulty::Hard;
 
-    pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        if game.get_state() == game::GameState::Game {
-            let btn_text_sizes: Vector2 = game.get_font().measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE, game.get_font_spacing());
-            let btn_padding: Vector2 = Vector2 {
-                x: self.btn_exit.x + (self.btn_exit.width - btn_text_sizes.x) / 2.0, 
-                y: self.btn_exit.y + (self.btn_exit.height - btn_text_sizes.y) / 2.0
+        for (i, el) in self.buttons.iter().enumerate() {
+            index = i as i32;
+            text = format!("{0}", self.numbers[i]);
+            text_sizes = game.get_font().measure_text(&text, 48.0, game.get_font_spacing());
+            text_padding = Vector2 {
+                x: el.x + (RECTANGLE_WIDTH - text_sizes.x) / 2.0, 
+                y: el.y + (RECTANGLE_HEIGHT - text_sizes.y) / 2.0
             };
 
-            if self.btn_exit_color == Color::WHITE {
-                d.draw_rectangle_lines_ex(self.btn_exit, 1.0, Color::BLACK);
+            if self.correct_buttons.contains(&index) {
+                if is_hard_difficulty {
+                    d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
+                } else {
+                    d.draw_rectangle_rec(el, Color::GREEN);
+                    text_color = Color::WHITE;
+                }
+            } else if self.incorrect_btn_index == index {
+                d.draw_rectangle_rec(el, Color::RED);
+                text_color = Color::WHITE;
+            } else if self.active_btn_index == index {
+                d.draw_rectangle_rec(el, Color::LIGHTGREEN);
             } else {
-                d.draw_rectangle_rec(self.btn_exit, self.btn_exit_color);
+                d.draw_rectangle_lines_ex(el, 2.0, Color::BLACK);
             }
-            d.draw_text_ex(game.get_font(), BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
+            d.draw_text_ex(game.get_font(), &text, text_padding, 48.0, game.get_font_spacing(), text_color);
+            text_color = Color::BLACK;
         }
+
+        self.timer.draw(d, &game);
     }
 
-    pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        self.draw_level(d, &game);
-        self.draw_score(d, &game);
-        self.draw_exit_button(d, &game);
+    fn draw_win(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        draw_text_center(d, "Congratulations. You win!!!", game.get_window_height() / 2.0 - 30.0, 60.0, Color::GREEN, &game);
+
+        self.draw_after_game_buttons(d, game);
+    }
+
+    fn draw_lose(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        let lose_text: String = format!("Sorry. You lose with score: {0} points (and {1} fails).", self.score, self.fails);
+        draw_text_center(d, lose_text.as_str(), game.get_window_height() / 2.0 - 30.0, 60.0, Color::RED, &game);
+
+        self.draw_after_game_buttons(d, game);
+    }
+
+    fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        let text: String = format!("Your score  -  {0} points.", self.score);
+        draw_text_center(d, text.as_str(), 24.0, 36.0, Color::GREEN, &game);
+    }
+
+    fn draw_game_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        let btn_text_sizes: Vector2 = game.get_font().measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE, game.get_font_spacing());
+        let btn_padding: Vector2 = Vector2 {
+            x: self.btn_game_exit.get_rec().x + (self.btn_game_exit.get_rec().width - btn_text_sizes.x) / 2.0, 
+            y: self.btn_game_exit.get_rec().y + (self.btn_game_exit.get_rec().height - btn_text_sizes.y) / 2.0
+        };
+
+        if self.btn_game_exit.get_color() == Color::WHITE {
+            d.draw_rectangle_lines_ex(self.btn_game_exit.get_rec(), 1.0, Color::BLACK);
+        } else {
+            d.draw_rectangle_rec(self.btn_game_exit.get_rec(), self.btn_game_exit.get_color());
+        }
+        d.draw_text_ex(game.get_font(), BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
+    }
+
+    fn draw_after_game_buttons(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        for btn in [&self.btn_after_game_try_again, &self.btn_after_game_exit].iter() {
+            // Draw button
+            let btn_text_sizes: Vector2 = game.get_font().measure_text(btn.get_title().as_str(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
+            let btn_padding: Vector2 = Vector2 {
+                x: btn.get_rec().x + (btn.get_rec().width - btn_text_sizes.x) / 2.0, 
+                y: btn.get_rec().y + (btn.get_rec().height - btn_text_sizes.y) / 2.0
+            };
+
+            if btn.get_color() == Color::WHITE {
+                d.draw_rectangle_lines_ex(btn.get_rec(), 1.0, Color::BLACK);
+            } else {
+                d.draw_rectangle_rec(btn.get_rec(), btn.get_color());
+            }
+            d.draw_text_ex(game.get_font(), btn.get_title().as_str(), btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
+        }
     }
 }

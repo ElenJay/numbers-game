@@ -23,7 +23,7 @@ fn main() {
         .vsync()
         .build();
 
-    let mut game: Game = Game::new(&mut rl, &thread);
+    let mut game: Game = Game::new(&mut rl, &thread, game::GameMode::Release);
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon

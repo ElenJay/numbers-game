@@ -70,7 +70,7 @@ impl Timer {
         let timer_str: String = format!("{0:0>2}:{1:0>2}", (left_time - left_time % 60) / 60, left_time % 60);
         let text_sizes: Vector2 = game.get_font().measure_text(&timer_str, 48.0, game.get_font_spacing());
         let text_pos: Vector2 = Vector2 {
-            x: game.get_window_width() as f32 - text_sizes.x - 16.0, 
+            x: game.get_window_width() - text_sizes.x - 16.0, 
             y: 10.0
         };
 

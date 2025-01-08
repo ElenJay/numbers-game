@@ -9,7 +9,7 @@ use crate::level::Level;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
-    // Debug,
+    Debug,
     Release,
 }
 
@@ -52,8 +52,8 @@ pub struct Game {
     difficulty: GameDifficulty,
     settings: GameSettings,
     game_font: GameFont,
-    window_width: i32,
-    window_height: i32,
+    window_width: f32,
+    window_height: f32,
     fullscreen_width: i32,
     fullscreen_height: i32,
 }
@@ -63,7 +63,7 @@ impl Game {
     pub const DEFAULT_WINDOW_HEIGHT: i32 = 900;
     pub const CUSTOM_FONT_PATH: &str = "assets/fonts/Arimo-Regular.ttf";
 
-    pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread) -> Self {
+    pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread, mode: GameMode) -> Self {
         let english_alphabet: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let cyrillic_alphabet: &str = "абвгдеєжзиіЇйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
         let ascii_symbols: &str = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
@@ -75,7 +75,7 @@ impl Game {
         };
 
         Self {
-            mode: GameMode::Release,
+            mode: mode,
             state: GameState::Menu,
             difficulty: GameDifficulty::Easy,
             settings: GameSettings {
@@ -87,11 +87,15 @@ impl Game {
                 font: rl.load_font_ex(&thread, Self::CUSTOM_FONT_PATH, 200, Some(alphabet.as_str())).unwrap(), 
                 spacing: spacing 
             },
-            window_width: Self::DEFAULT_WINDOW_WIDTH,
-            window_height: Self::DEFAULT_WINDOW_HEIGHT,
+            window_width: Self::DEFAULT_WINDOW_WIDTH as f32,
+            window_height: Self::DEFAULT_WINDOW_HEIGHT as f32,
             fullscreen_width: 0,
             fullscreen_height: 0,
         }
+    }
+
+    pub fn get_mode(&self) -> GameMode {
+        self.mode
     }
 
     pub fn get_state(&self) -> GameState {
@@ -122,17 +126,17 @@ impl Game {
         self.game_font.spacing
     }
 
-    pub fn get_window_width(&self) -> i32 {
+    pub fn get_window_width(&self) -> f32 {
         self.window_width
     }
 
-    pub fn get_window_height(&self) -> i32 {
+    pub fn get_window_height(&self) -> f32 {
         self.window_height
     }
 
     pub fn set_window_sizes(&mut self, width: i32, height: i32) {
-        self.window_width = width;
-        self.window_height = height;
+        self.window_width = width as f32;
+        self.window_height = height as f32;
     }
 
     pub fn set_fullscreen_sizes(&mut self, width: i32, height: i32) {
