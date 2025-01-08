@@ -16,5 +16,6 @@ pub fn draw_text_center(d: &mut RaylibDrawHandle, text: &str, y: f32, font_size:
 pub fn generate_numbers_array(length: i32) -> Vec<i32> {
     let mut vec: Vec<i32> = (1..=length).collect();
     vec.shuffle(&mut thread_rng());
+    
     vec
 }

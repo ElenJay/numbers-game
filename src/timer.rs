@@ -67,7 +67,7 @@ impl Timer {
 
     pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game, ) {
         let left_time: i32 = if self.is_running { self.start_time + self.duration - Self::get_current_time_in_secs() } else { 0.0 } as i32;
-        let timer_str = format!("{0:0>2}:{1:0>2}", (left_time - left_time % 60) / 60, left_time % 60);
+        let timer_str: String = format!("{0:0>2}:{1:0>2}", (left_time - left_time % 60) / 60, left_time % 60);
         let text_sizes: Vector2 = game.get_font().measure_text(&timer_str, 48.0, game.get_font_spacing());
         let text_pos: Vector2 = Vector2 {
             x: game.get_window_width() as f32 - text_sizes.x - 16.0, 

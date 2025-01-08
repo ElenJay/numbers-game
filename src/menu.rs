@@ -145,7 +145,7 @@ impl Menu {
 
     pub fn process_controller(&mut self, rl: &mut RaylibHandle, game: &mut game::Game, level: &mut level::Level) {
         if game.get_state() == game::GameState::Menu {
-            let mouse_pos = rl.get_mouse_position();
+            let mouse_pos: Vector2 = rl.get_mouse_position();
 
             if self.state == MenuState::Primary {
                 for item in self.items.iter_mut() {
@@ -221,7 +221,7 @@ impl Menu {
     fn draw_menu_button(&self, d: &mut RaylibDrawHandle, game: &game::Game, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
         d.draw_rectangle_rec(btn, btn_color);
         let btn_text_sizes: Vector2 = game.get_font().measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing());
-        let btn_padding = Vector2 {
+        let btn_padding: Vector2 = Vector2 {
             x: btn.x + (btn.width - btn_text_sizes.x) / 2.0, 
             y: btn.y + (btn.height - btn_text_sizes.y) / 2.0
         };

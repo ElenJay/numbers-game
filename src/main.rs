@@ -23,7 +23,7 @@ fn main() {
         .vsync()
         .build();
 
-    let mut game = Game::new(&mut rl, &thread);
+    let mut game: Game = Game::new(&mut rl, &thread);
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon
@@ -32,8 +32,8 @@ fn main() {
 
     update_window_sizes(&mut rl, &mut game);
 
-    let mut menu = Menu::new(&game);
-    let mut level = Level::new(&game);
+    let mut menu: Menu = Menu::new(&game);
+    let mut level: Level = Level::new(&game);
 
     while !rl.window_should_close() {
         // Processing controllers
@@ -52,14 +52,14 @@ fn main() {
 }
 
 fn update_window_sizes(rl: &mut RaylibHandle, game: &mut Game) {
-    let monitor_index = get_current_monitor_index();
+    let monitor_index: i32 = get_current_monitor_index();
     
     // ToDo: need to check if it requires on Windows and Linux
     rl.toggle_borderless_windowed();
     rl.toggle_fullscreen();
     
-    let window_width = get_monitor_width(monitor_index);
-    let window_height = get_monitor_height(monitor_index);
+    let window_width: i32 = get_monitor_width(monitor_index);
+    let window_height: i32 = get_monitor_height(monitor_index);
 
     game.set_fullscreen_sizes(window_width, window_height);
     game.set_window_sizes(window_width, window_height);

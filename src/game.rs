@@ -64,10 +64,10 @@ impl Game {
     pub const CUSTOM_FONT_PATH: &str = "assets/fonts/Arimo-Regular.ttf";
 
     pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread) -> Self {
-        let english_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        let cyrillic_alphabet = "абвгдеєжзиіЇйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
-        let ascii_symbols = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
-        let alphabet = format!("{}{}{}", ascii_symbols, english_alphabet, cyrillic_alphabet);
+        let english_alphabet: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let cyrillic_alphabet: &str = "абвгдеєжзиіЇйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
+        let ascii_symbols: &str = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
+        let alphabet: String = format!("{}{}{}", ascii_symbols, english_alphabet, cyrillic_alphabet);
 
         let spacing: f32 = match std::fs::File::open(Self::CUSTOM_FONT_PATH) {
             Ok(_) => 1.0,

@@ -39,7 +39,7 @@ impl Level {
         if h_opacity > MAX_H_OPACITY { h_opacity = MAX_H_OPACITY; }
         if v_opacity > MAX_V_OPACITY { v_opacity = MAX_V_OPACITY; }
 
-        let mut obj = Self {
+        let mut obj: Self = Self {
             numbers: Vec::with_capacity((H_COUNT * V_COUNT) as usize),
             buttons: Vec::new(),
             active_btn_index: -1,
@@ -103,7 +103,7 @@ impl Level {
             self.timer.pause();
         }
         if game.get_state() == game::GameState::Game {
-            let mouse_pos = rl.get_mouse_position();
+            let mouse_pos: Vector2 = rl.get_mouse_position();
             let mut has_collision: bool = false;
             let mut index: i32;
 
@@ -166,7 +166,7 @@ impl Level {
         let window_height: f32 = game.get_window_height() as f32;
         let mut h_opacity: f32 = (window_width - 600.0 - H_COUNT as f32 * RECTANGLE_WIDTH) / (H_COUNT - 1) as f32;
         let mut v_opacity: f32 = (window_height - 600.0 - V_COUNT as f32 * RECTANGLE_HEIGHT) / (V_COUNT - 1) as f32;
-        let mut index;
+        let mut index: usize;
 
         if h_opacity > MAX_H_OPACITY {
             h_opacity = MAX_H_OPACITY;
@@ -190,7 +190,7 @@ impl Level {
 
     pub fn draw_level(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
-            let mut text;
+            let mut text: String;
             let mut index: i32;
             let mut text_color: Color = Color::BLACK;
             let mut text_sizes: Vector2;
@@ -229,14 +229,14 @@ impl Level {
         } else if game.get_state() == game::GameState::Win {
             draw_text_center(d, "Congratulations. You win!!!", game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::GREEN, &game)
         } else if game.get_state() == game::GameState::Lose {
-            let lose_text = format!("Sorry. You lose with score: {0} points (and {1} fails).", self.score, self.fails);
+            let lose_text: String = format!("Sorry. You lose with score: {0} points (and {1} fails).", self.score, self.fails);
             draw_text_center(d, lose_text.as_str(), game.get_window_height() as f32 / 2.0 - 30.0, 60.0, Color::RED, &game)
         }
     }
 
     pub fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
-            let text = format!("Your score  -  {0} points.", self.score);
+            let text: String = format!("Your score  -  {0} points.", self.score);
             draw_text_center(d, text.as_str(), 24.0, 36.0, Color::GREEN, &game);
         }
     }
@@ -244,7 +244,7 @@ impl Level {
     pub fn draw_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Game {
             let btn_text_sizes: Vector2 = game.get_font().measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE, game.get_font_spacing());
-            let btn_padding = Vector2 {
+            let btn_padding: Vector2 = Vector2 {
                 x: self.btn_exit.x + (self.btn_exit.width - btn_text_sizes.x) / 2.0, 
                 y: self.btn_exit.y + (self.btn_exit.height - btn_text_sizes.y) / 2.0
             };
