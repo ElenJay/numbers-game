@@ -10,16 +10,6 @@ const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
 const DEFAULT_MENU_ITEMS_DIFF: f32 = DEFAULT_MENU_ITEM_HEIGHT / 2.0;
 const DEFAULT_MENU_ITEM_FONT_SIZE: f32 = 54.0;
 
-const BTN_START_TEXT: &str = "Start";
-const BTN_CONTINUE_TEXT: &str = "Continue";
-const BTN_SETTINGS_TEXT: &str = "Settings";
-const BTN_HELP_TEXT: &str = "Help";
-const BTN_EXIT_TEXT: &str = "Exit";
-const BTN_DIFFICULTY_TEXT: &str = "Difficulty";
-const BTN_FULLSCREEN_TEXT: &str = "Fullscreen";
-const BTN_TOGGLE_FPS_TEXT: &str = "FPS counter";
-const BTN_BACK_TEXT: &str = "Back";
-
 const HELP_HOW_TO_PLAY_TEXT: &str = "How to Play:";
 const HELP_HOW_TO_PLAY_TEXT_1: &str = "1. Click the numbers from 1 to 56 in order as fast as you can.";
 const HELP_HOW_TO_PLAY_TEXT_2: &str = "2. Time's ticking! The game ends when the timer runs out.";
@@ -30,20 +20,34 @@ const HELP_TIPS_TEXT_2: &str = "- Practice makes perfect! The more you play, the
 const HELP_TIPS_TEXT_3: &str = "- Have fun! This is a challenging and addictive game.";
 const HELP_BACK_TEXT: &str = "Press Esc button to go back to the menu...";
 
-// ToDo: separate menu items and implement enum iterator
-// enum MENU_ITEMS_TEXT {
-//     BTN_START_TEXT,
-//     BTN_CONTINUE_TEXT,
-//     BTN_SETTINGS_TEXT,
-//     BTN_HELP_TEXT,
-//     BTN_EXIT_TEXT,
-// }
+#[derive(Clone, Copy, PartialEq)]
+enum MenuAllItems {
+    Start,
+    Continue,
+    Settings,
+    Help,
+    Exit,
+    Difficulty,
+    Fullscreen,
+    ToggleFPS,
+    Back,
+}
 
-// enum MENU_SETTINGS_ITEMS_TEXT {
-//     BTN_DIFFICULTY_TEXT,
-//     BTN_FULLSCREEN_TEXT,
-//     BTN_BACK_TEXT,
-// }
+impl MenuAllItems {
+    fn value(&self) -> &str {
+        match *self {
+            Self::Start => "Start",
+            Self::Continue => "Continue",
+            Self::Settings => "Settings",
+            Self::Help => "Help",
+            Self::Exit => "Exit",
+            Self::Difficulty => "Difficulty",
+            Self::Fullscreen => "Fullscreen",
+            Self::ToggleFPS => "FPS counter",
+            Self::Back => "Back",
+        }
+    }
+}
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum MenuState {
@@ -54,7 +58,7 @@ pub enum MenuState {
 
 pub struct MenuItem {
     btn: Rectangle,
-    content: String,
+    content: MenuAllItems,
     color: Color,
     is_disabled: bool,
 }
@@ -66,7 +70,7 @@ pub struct Menu {
 }
 
 impl Menu {
-    fn construct_menu_items(titles: Vec<String>, window_width: f32, window_height: f32) -> Vec<MenuItem> {
+    fn construct_menu_items(titles: Vec<MenuAllItems>, window_width: f32, window_height: f32) -> Vec<MenuItem> {
         let mut items: Vec<MenuItem> = Vec::with_capacity(titles.len());
         let all_items_height: f32 = titles.len() as f32 * DEFAULT_MENU_ITEM_HEIGHT + (titles.len() - 1) as f32 * DEFAULT_MENU_ITEMS_DIFF;
         for (index, title) in titles.iter().enumerate() {
@@ -77,9 +81,9 @@ impl Menu {
                     width: DEFAULT_MENU_ITEM_WIDTH, 
                     height: DEFAULT_MENU_ITEM_HEIGHT,
                 },
-                content: title.clone(),
+                content: *title,
                 color: Color::LIGHTGRAY,
-                is_disabled: title == BTN_CONTINUE_TEXT,
+                is_disabled: *title == MenuAllItems::Continue,
             });
         }
         items
@@ -89,18 +93,18 @@ impl Menu {
         let window_width: f32 = game.get_window_width() as f32;
         let window_height: f32 = game.get_window_height() as f32;
 
-        let items_titles: Vec<String> = vec![
-            BTN_START_TEXT.to_string(), 
-            BTN_CONTINUE_TEXT.to_string(),
-            BTN_SETTINGS_TEXT.to_string(), 
-            BTN_HELP_TEXT.to_string(),
-            BTN_EXIT_TEXT.to_string(), 
+        let items_titles: Vec<MenuAllItems> = vec![
+            MenuAllItems::Start, 
+            MenuAllItems::Continue,
+            MenuAllItems::Settings, 
+            MenuAllItems::Help,
+            MenuAllItems::Exit, 
         ];
-        let settings_items_titles: Vec<String> = vec![
-            BTN_DIFFICULTY_TEXT.to_string(),
-            BTN_FULLSCREEN_TEXT.to_string(), 
-            BTN_TOGGLE_FPS_TEXT.to_string(), 
-            BTN_BACK_TEXT.to_string(),
+        let settings_items_titles: Vec<MenuAllItems> = vec![
+            MenuAllItems::Difficulty,
+            MenuAllItems::Fullscreen, 
+            MenuAllItems::ToggleFPS, 
+            MenuAllItems::Back,
         ];
 
         Self {
@@ -146,7 +150,7 @@ impl Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter_mut() {
                     if item.is_disabled {
-                        if item.content.as_str() == BTN_CONTINUE_TEXT && level.is_started() {
+                        if item.content == MenuAllItems::Continue && level.is_started() {
                             item.is_disabled = false;
                         } else {
                             continue;
@@ -156,21 +160,21 @@ impl Menu {
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                            match item.content.as_str() {
-                                BTN_START_TEXT => {
+                            match item.content {
+                                MenuAllItems::Start => {
                                     game.set_state(game::GameState::Game);
                                     level.restart(game);
                                 },
-                                BTN_CONTINUE_TEXT => {
+                                MenuAllItems::Continue => {
                                     level.resume(game);
                                 },
-                                BTN_SETTINGS_TEXT => {
+                                MenuAllItems::Settings => {
                                     self.state = MenuState::Settings;
                                 },
-                                BTN_HELP_TEXT => {
+                                MenuAllItems::Help => {
                                     self.state = MenuState::Help;
                                 },
-                                BTN_EXIT_TEXT => {
+                                MenuAllItems::Exit => {
                                     std::process::exit(0);
                                 },
                                 _ => {},
@@ -187,18 +191,18 @@ impl Menu {
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                            match item.content.as_str() {
-                                BTN_DIFFICULTY_TEXT => {
+                            match item.content {
+                                MenuAllItems::Difficulty => {
                                     game.change_difficulty(game.get_difficulty());
                                 },
-                                BTN_FULLSCREEN_TEXT => {
+                                MenuAllItems::Fullscreen => {
                                     is_fullscreen_required = true;
                                 },
-                                BTN_BACK_TEXT => {
-                                    self.state = MenuState::Primary;
-                                },
-                                BTN_TOGGLE_FPS_TEXT => {
+                                MenuAllItems::ToggleFPS => {
                                     game.toggle_fps_monitor();
+                                },
+                                MenuAllItems::Back => {
+                                    self.state = MenuState::Primary;
                                 },
                                 _ => {},
                             }
@@ -228,11 +232,11 @@ impl Menu {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter() {
-                    self.draw_menu_button(d, &game, &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, &game, &item.btn, item.content.value(), &item.color);
                 }
             } else if self.state == MenuState::Settings {
                 for item in self.settings_items.iter() {
-                    self.draw_menu_button(d, &game, &item.btn, item.content.as_str(), &item.color);
+                    self.draw_menu_button(d, &game, &item.btn, item.content.value(), &item.color);
                 }
                 let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
                 draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() as f32 - 60.0, 40.0, Color::GREEN, &game)
