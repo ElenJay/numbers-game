@@ -18,7 +18,7 @@ Build dependencies with `cargo build`, and then run with `cargo run`.
 
 ### Font
 
-Lemon Milk (Light)
+Arimo (Regular)
 
 ## Screenshots
 

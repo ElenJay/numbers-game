@@ -24,9 +24,6 @@ fn main() {
         .build();
 
     let mut game = Game::new(&mut rl, &thread);
-    
-    // ToDo: add global spicing 5.0 if font wasn't loaded
-    // ToDo: add support of cyrillic symbols
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon

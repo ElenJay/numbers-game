@@ -61,9 +61,14 @@ pub struct Game {
 impl Game {
     pub const DEFAULT_WINDOW_WIDTH: i32 = 1600;
     pub const DEFAULT_WINDOW_HEIGHT: i32 = 900;
-    pub const CUSTOM_FONT_PATH: &str = "assets/fonts/custom-font.otf";
+    pub const CUSTOM_FONT_PATH: &str = "assets/fonts/Arimo-Regular.ttf";
 
     pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread) -> Self {
+        let english_alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let cyrillic_alphabet = "абвгдеєжзиіЇйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
+        let ascii_symbols = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
+        let alphabet = format!("{}{}{}", ascii_symbols, english_alphabet, cyrillic_alphabet);
+
         let spacing: f32 = match std::fs::File::open(Self::CUSTOM_FONT_PATH) {
             Ok(_) => 1.0,
             Err(_) => 5.0,
@@ -79,7 +84,7 @@ impl Game {
                 is_fps_visible: false,
             },
             game_font: GameFont {
-                font: rl.load_font_ex(&thread, Self::CUSTOM_FONT_PATH, 200, None).unwrap(), 
+                font: rl.load_font_ex(&thread, Self::CUSTOM_FONT_PATH, 200, Some(alphabet.as_str())).unwrap(), 
                 spacing: spacing 
             },
             window_width: Self::DEFAULT_WINDOW_WIDTH,
