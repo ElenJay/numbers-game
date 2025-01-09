@@ -19,11 +19,11 @@ fn main() {
     let (mut rl, thread) = raylib::init()
         .size(Game::DEFAULT_WINDOW_WIDTH, Game::DEFAULT_WINDOW_HEIGHT)
         .title("Numbers Game")
-        .resizable()
+        // .resizable()
         .vsync()
         .build();
 
-    let mut game: Game = Game::new(&mut rl, &thread, game::GameMode::Release);
+    let mut game: Game = Game::new(&mut rl, &thread, game::GameMode::Debug);
 
     if env::consts::OS != "macos" {
         // ToDo: in MacOS the app should be properly bundled to show icon

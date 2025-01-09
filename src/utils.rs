@@ -31,6 +31,10 @@ impl Button {
         self.color
     }
 
+    pub fn set_rec(&mut self, rec: Rectangle) {
+        self.rec = rec;
+    }
+
     pub fn set_color(&mut self, color: Color) {
         self.color = color;
     }
