@@ -21,7 +21,7 @@ const HELP_TIPS_TEXT_3: &str = "- Have fun! This is a challenging and addictive 
 const HELP_BACK_TEXT: &str = "Press Esc button to go back to the menu...";
 
 #[derive(Clone, Copy, PartialEq)]
-enum MenuAllItems {
+pub enum MenuAllItems {
     Start,
     Continue,
     Settings,
@@ -60,7 +60,6 @@ pub struct MenuItem {
     btn: Rectangle,
     content: MenuAllItems,
     color: Color,
-    is_disabled: bool,
 }
 
 pub struct Menu {
@@ -70,7 +69,27 @@ pub struct Menu {
 }
 
 impl Menu {
-    fn construct_menu_items(titles: Vec<MenuAllItems>, window_width: f32, window_height: f32) -> Vec<MenuItem> {
+    pub const PRIMARY_ITEMS: [MenuAllItems; 4] = [
+        MenuAllItems::Start,
+        MenuAllItems::Settings, 
+        MenuAllItems::Help,
+        MenuAllItems::Exit, 
+    ];
+    pub const FULL_PRIMARY_ITEMS: [MenuAllItems; 5] = [
+        MenuAllItems::Start,
+        MenuAllItems::Continue,
+        MenuAllItems::Settings, 
+        MenuAllItems::Help,
+        MenuAllItems::Exit, 
+    ];
+    pub const SETTINGS_ITEMS: [MenuAllItems; 4] = [
+        MenuAllItems::Difficulty,
+        MenuAllItems::Fullscreen, 
+        MenuAllItems::ToggleFPS, 
+        MenuAllItems::Back,
+    ];
+
+    fn construct_menu_items(titles: &[MenuAllItems], window_width: f32, window_height: f32) -> Vec<MenuItem> {
         let mut items: Vec<MenuItem> = Vec::with_capacity(titles.len());
         let all_items_height: f32 = titles.len() as f32 * DEFAULT_MENU_ITEM_HEIGHT + (titles.len() - 1) as f32 * DEFAULT_MENU_ITEMS_DIFF;
         for (index, title) in titles.iter().enumerate() {
@@ -83,7 +102,6 @@ impl Menu {
                 },
                 content: *title,
                 color: Color::LIGHTGRAY,
-                is_disabled: *title == MenuAllItems::Continue,
             });
         }
         items
@@ -93,24 +111,10 @@ impl Menu {
         let window_width: f32 = game.get_window_width();
         let window_height: f32 = game.get_window_height();
 
-        let items_titles: Vec<MenuAllItems> = vec![
-            MenuAllItems::Start, 
-            MenuAllItems::Continue,
-            MenuAllItems::Settings, 
-            MenuAllItems::Help,
-            MenuAllItems::Exit, 
-        ];
-        let settings_items_titles: Vec<MenuAllItems> = vec![
-            MenuAllItems::Difficulty,
-            MenuAllItems::Fullscreen, 
-            MenuAllItems::ToggleFPS, 
-            MenuAllItems::Back,
-        ];
-
         Self {
             state: MenuState::Primary,
-            items: Self::construct_menu_items(items_titles, window_width, window_height),
-            settings_items: Self::construct_menu_items(settings_items_titles, window_width, window_height),
+            items: Self::construct_menu_items(&Self::PRIMARY_ITEMS, window_width, window_height),
+            settings_items: Self::construct_menu_items(&Self::SETTINGS_ITEMS, window_width, window_height),
         }
     }
 
@@ -148,15 +152,14 @@ impl Menu {
             let mouse_pos: Vector2 = rl.get_mouse_position();
 
             if self.state == MenuState::Primary {
+                let mut has_primary_menu_to_be_updated: bool = false;
+                let items_count: usize = self.items.len();
+
+                if items_count == 5 && level.is_over() {
+                    self.update_primary_menu(game, 4);
+                }
+
                 for item in self.items.iter_mut() {
-                    if item.is_disabled {
-                        if item.content == MenuAllItems::Continue && level.is_started() {
-                            item.is_disabled = false;
-                        } else {
-                            continue;
-                        }
-                    }
-                    
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
@@ -164,6 +167,7 @@ impl Menu {
                                 MenuAllItems::Start => {
                                     game.set_state(game::GameState::Game);
                                     level.start(game);
+                                    has_primary_menu_to_be_updated = items_count == 4;
                                 },
                                 MenuAllItems::Continue => {
                                     level.resume(game);
@@ -183,6 +187,10 @@ impl Menu {
                     } else if item.color != Color::LIGHTGRAY {
                         item.color = Color::LIGHTGRAY;
                     }
+                }
+
+                if has_primary_menu_to_be_updated {
+                    self.update_primary_menu(game, 5);
                 }
             } else if self.state == MenuState::Settings {
                 let mut is_fullscreen_required: bool = false;
@@ -268,5 +276,13 @@ impl Menu {
 
     pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         self.draw_menu(d, game);
+    }
+
+    fn update_primary_menu(&mut self, game: &game::Game, items_count: i32) {
+        if items_count == 4 {
+            self.items = Self::construct_menu_items(&Self::PRIMARY_ITEMS, game.get_window_width(), game.get_window_height());
+        } else if items_count == 5 {
+            self.items = Self::construct_menu_items(&Self::FULL_PRIMARY_ITEMS, game.get_window_width(), game.get_window_height());
+        }
     }
 }

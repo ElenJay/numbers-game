@@ -104,6 +104,10 @@ impl Level {
         self.numbers.len() > 0
     }
 
+    pub fn is_over(&self) -> bool {
+        self.timer.is_finished()
+    }
+
     pub fn resume(&mut self, game: &mut game::Game) {
         game.set_state(game::GameState::Game);
         self.timer.resume();
@@ -111,12 +115,7 @@ impl Level {
 
     pub fn start(&mut self, game: &game::Game) {
         self.numbers = generate_numbers_array(H_COUNT * V_COUNT);
-        self.active_btn_index = -1;
-        self.incorrect_btn_index = -1;
-        self.correct_buttons.clear();
-        self.score = 0;
-        self.timer = timer::Timer::new(Self::get_timer_duration(game));
-        self.timer.start();
+        self.restart(game);
     }
 
     pub fn restart(&mut self, game: &game::Game) {

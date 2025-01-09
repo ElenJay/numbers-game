@@ -30,6 +30,15 @@ impl Timer {
         self.is_running
     }
 
+    pub fn is_finished(&self) -> bool {
+        !self.is_running && self.start_time == 0.0
+    }
+
+    pub fn is_over(&self) -> bool {
+        let current_time: f64 = Self::get_current_time_in_secs();
+        self.is_running && current_time >= (self.start_time + self.duration)
+    }
+
     pub fn activate(&mut self) {
         if Self::get_current_time_in_secs() > self.start_time + START_DELAY_SECS {
             self.is_running = true;
@@ -58,11 +67,6 @@ impl Timer {
     pub fn finish(&mut self) {
         self.is_running = false;
         self.start_time = 0.0;
-    }
-
-    pub fn is_over(&self) -> bool {
-        let current_time: f64 = Self::get_current_time_in_secs();
-        self.is_running && current_time >= (self.start_time + self.duration)
     }
 
     pub fn draw(&self, d: &mut RaylibDrawHandle, game: &game::Game, ) {
