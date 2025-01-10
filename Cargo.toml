@@ -3,7 +3,19 @@ name = "numbers-game"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.bundle]
+name = "NumberSprintApplication"
+identifier = "com.elenjay.numbersprintapp"
+icon = ["assets/images/icon.png"]
+version = "0.1.0"
+resources = ["assets"]
+copyright = "Copyright (c) ElenJay 2025. All rights reserved."
+category = "Developer Tool"
+short_description = "Computer game"
+long_description = """
+The game requires you to click on numbers in correct order until the time is over.
+"""
+osx_url_schemes = ["com.elenjay.numbersprintapp"]
 
 [dependencies]
 raylib = "5.0.2"
