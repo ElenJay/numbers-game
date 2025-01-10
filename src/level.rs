@@ -123,6 +123,7 @@ impl Level {
         self.incorrect_btn_index = -1;
         self.correct_buttons.clear();
         self.score = 0;
+        self.fails = 0;
         self.timer = timer::Timer::new(Self::get_timer_duration(game));
         self.timer.start();
     }
@@ -172,7 +173,7 @@ impl Level {
                                 self.incorrect_btn_index = -1;
                                 self.score += 1;
                             } else {
-                                if self.incorrect_btn_index != -1 {
+                                if self.incorrect_btn_index != index {
                                     self.fails += 1;
                                 }
                                 self.incorrect_btn_index = index;

@@ -1,4 +1,3 @@
-// ToDo: fix the attribute
 #![allow(dead_code)]
 
 use raylib::prelude::*;
