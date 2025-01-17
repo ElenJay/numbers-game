@@ -3,22 +3,17 @@ use raylib::consts::MouseButton::*;
 
 use crate::game;
 use crate::level;
-use crate::utils::draw_text_center;
 
 const DEFAULT_MENU_ITEM_WIDTH: f32 = 400.0;
 const DEFAULT_MENU_ITEM_HEIGHT: f32 = 80.0;
 const DEFAULT_MENU_ITEMS_DIFF: f32 = DEFAULT_MENU_ITEM_HEIGHT / 2.0;
 const DEFAULT_MENU_ITEM_FONT_SIZE: f32 = 54.0;
 
-const HELP_HOW_TO_PLAY_TEXT: &str = "How to Play:";
-const HELP_HOW_TO_PLAY_TEXT_1: &str = "1. Click the numbers from 1 to 56 in order as fast as you can.";
-const HELP_HOW_TO_PLAY_TEXT_2: &str = "2. Time's ticking! The game ends when the timer runs out.";
-const HELP_HOW_TO_PLAY_TEXT_3: &str = "3. Aim for the highest score: Your score is based on the number of numbers you clicked correctly within the time limit.";
-const HELP_TIPS_TEXT: &str = "Tips:";
-const HELP_TIPS_TEXT_1: &str = "- Stay focused! Keep your eyes on the numbers and click quickly.";
-const HELP_TIPS_TEXT_2: &str = "- Practice makes perfect! The more you play, the faster you'll get.";
-const HELP_TIPS_TEXT_3: &str = "- Have fun! This is a challenging and addictive game.";
-const HELP_BACK_TEXT: &str = "Press Esc button to go back to the menu...";
+struct HelpTextRow {
+    content: String,
+    font_size: u8,
+    padding_bottom: u16,
+}
 
 #[derive(Clone, Copy, PartialEq)]
 enum MenuAllItems {
@@ -41,10 +36,8 @@ impl MenuAllItems {
             Self::Settings => "Settings",
             Self::Help => "Help",
             Self::Exit => "Exit",
-            Self::Difficulty => "Difficulty",
-            Self::Fullscreen => "Fullscreen",
-            Self::ToggleFPS => "FPS counter",
             Self::Back => "Back",
+            _ => "",
         }
     }
 
@@ -77,6 +70,7 @@ pub struct Menu {
     state: MenuState,
     items: Vec<MenuItem>,
     settings_items: Vec<MenuItem>,
+    help_rows: [HelpTextRow; 9],
 }
 
 impl Menu {
@@ -150,6 +144,17 @@ impl Menu {
             state: MenuState::Primary,
             items: Self::construct_menu_items(&Self::PRIMARY_ITEMS, window_width, window_height),
             settings_items: Self::construct_menu_items(&Self::SETTINGS_ITEMS, window_width, window_height),
+            help_rows: [
+                HelpTextRow { font_size: 32, padding_bottom: 64, content: "How to Play:".to_string(), },
+                HelpTextRow { font_size: 24, padding_bottom: 36, content: "1. Click the numbers from 1 to 56 in order as fast as you can.".to_string(), },
+                HelpTextRow { font_size: 24, padding_bottom: 36, content: "2. Time's ticking! The game ends when the timer runs out.".to_string(), },
+                HelpTextRow { font_size: 24, padding_bottom: 64, content: "3. Aim for the highest score: Your score is based on the number of numbers you clicked correctly within the time limit.".to_string(), },
+                HelpTextRow { font_size: 32, padding_bottom: 64, content: "Tips:".to_string(), },
+                HelpTextRow { font_size: 24, padding_bottom: 36, content: "- Stay focused! Keep your eyes on the numbers and click quickly.".to_string(), },
+                HelpTextRow { font_size: 24, padding_bottom: 36, content: "- Practice makes perfect! The more you play, the faster you'll get.".to_string(), },
+                HelpTextRow { font_size: 24, padding_bottom: 100, content: "- Have fun! This is a challenging and addictive game.".to_string(), },
+                HelpTextRow { font_size: 32, padding_bottom: 0, content: "Press Esc button to go back to the menu...".to_string(), },
+            ],
         }
     }
 
@@ -179,17 +184,14 @@ impl Menu {
         for (index, item) in self.settings_items.iter_mut().enumerate() {
             item.btn.y = (window_height - all_settings_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
 
-            match &item.description {
-                Some(..) => {
-                    item.btn.x = window_width / 8.0 * 7.0 - DEFAULT_MENU_ITEM_WIDTH;
-                    item.description_pos = Some(Vector2 {
-                        x: window_width / 8.0,
-                        y: item.btn.y + (DEFAULT_MENU_ITEM_HEIGHT - DEFAULT_MENU_ITEM_FONT_SIZE) / 2.0,
-                    });
-                },
-                _ => {
-                    item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
-                },
+            if item.title.value() == "" {
+                item.btn.x = window_width / 8.0 * 7.0 - DEFAULT_MENU_ITEM_WIDTH;
+                item.description_pos = Some(Vector2 {
+                    x: window_width / 8.0,
+                    y: item.btn.y + (DEFAULT_MENU_ITEM_HEIGHT - DEFAULT_MENU_ITEM_FONT_SIZE) / 2.0,
+                });
+            } else {
+                item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
             }
         }
     }
@@ -299,27 +301,14 @@ impl Menu {
     }
 
     fn draw_help_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        let text_sizes: Vector2 = game.get_font().measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20.0, game.get_font_spacing());
+        let text_sizes: Vector2 = game.get_font().measure_text(&self.help_rows[3].content, 20.0, game.get_font_spacing());
         let x: f32 = (game.get_window_width() - text_sizes.x) / 2.0;
         let mut y: f32 = (game.get_window_height() - (100.0 + 64.0 * 3.0 + 36.0 * 4.0 + 32.0)) / 2.0;
 
-        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
-        y += 64.0;
-        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-        y += 36.0;
-        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-        y += 36.0;
-        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-        y += 64.0;
-        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
-        y += 64.0;
-        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-        y += 36.0;
-        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-        y += 36.0;
-        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-        y += 100.0;
-        d.draw_text_ex(game.get_font(), HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
+        for item in self.help_rows.iter() {
+            d.draw_text_ex(game.get_font(), &item.content, Vector2 {x: x, y: y}, item.font_size as f32, game.get_font_spacing(), Color::BLACK);
+            y += item.padding_bottom as f32;
+        }
     }
 
     fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
