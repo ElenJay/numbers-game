@@ -33,11 +33,21 @@ impl std::fmt::Display for GameDifficulty {
     }
 }
 
+impl GameDifficulty {
+    pub fn repr(&self) -> &str {
+        match *self {
+            Self::Easy => "Easy",
+            Self::Medium => "Medium",
+            Self::Hard => "Hard",
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq)]
 pub struct GameSettings {
-    is_fullscreen: bool,
-    is_vsync: bool,
-    is_fps_visible: bool,
+    pub is_fullscreen: bool,
+    pub is_vsync: bool,
+    pub is_fps_visible: bool,
 }
 
 pub struct GameFont {
@@ -107,6 +117,10 @@ impl Game {
 
     pub fn get_difficulty(&self) -> GameDifficulty {
         self.difficulty
+    }
+
+    pub fn get_settings(&self) -> &GameSettings {
+        &self.settings
     }
 
     pub fn change_difficulty(&mut self, difficulty: GameDifficulty) {

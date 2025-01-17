@@ -21,7 +21,7 @@ const HELP_TIPS_TEXT_3: &str = "- Have fun! This is a challenging and addictive 
 const HELP_BACK_TEXT: &str = "Press Esc button to go back to the menu...";
 
 #[derive(Clone, Copy, PartialEq)]
-pub enum MenuAllItems {
+enum MenuAllItems {
     Start,
     Continue,
     Settings,
@@ -47,6 +47,15 @@ impl MenuAllItems {
             Self::Back => "Back",
         }
     }
+
+    fn description(&self) -> &str {
+        match *self {
+            Self::Difficulty => "Game difficulty",
+            Self::Fullscreen => "Fullscreen mode",
+            Self::ToggleFPS => "FPS counter on the screen",
+            _ => "",
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -58,8 +67,10 @@ pub enum MenuState {
 
 pub struct MenuItem {
     btn: Rectangle,
-    content: MenuAllItems,
+    title: MenuAllItems,
     color: Color,
+    description: Option<String>,
+    description_pos: Option<Vector2>,
 }
 
 pub struct Menu {
@@ -69,41 +80,65 @@ pub struct Menu {
 }
 
 impl Menu {
-    pub const PRIMARY_ITEMS: [MenuAllItems; 4] = [
+    const PRIMARY_ITEMS: [MenuAllItems; 4] = [
         MenuAllItems::Start,
         MenuAllItems::Settings, 
         MenuAllItems::Help,
         MenuAllItems::Exit, 
     ];
-    pub const FULL_PRIMARY_ITEMS: [MenuAllItems; 5] = [
+    const FULL_PRIMARY_ITEMS: [MenuAllItems; 5] = [
         MenuAllItems::Start,
         MenuAllItems::Continue,
         MenuAllItems::Settings, 
         MenuAllItems::Help,
         MenuAllItems::Exit, 
     ];
-    pub const SETTINGS_ITEMS: [MenuAllItems; 4] = [
+    const SETTINGS_ITEMS: [MenuAllItems; 4] = [
         MenuAllItems::Difficulty,
         MenuAllItems::Fullscreen, 
         MenuAllItems::ToggleFPS, 
         MenuAllItems::Back,
     ];
 
-    fn construct_menu_items(titles: &[MenuAllItems], window_width: f32, window_height: f32) -> Vec<MenuItem> {
-        let mut items: Vec<MenuItem> = Vec::with_capacity(titles.len());
-        let all_items_height: f32 = titles.len() as f32 * DEFAULT_MENU_ITEM_HEIGHT + (titles.len() - 1) as f32 * DEFAULT_MENU_ITEMS_DIFF;
-        for (index, title) in titles.iter().enumerate() {
-            items.push(MenuItem {
-                btn: Rectangle {
-                    x: (window_width as f32 - DEFAULT_MENU_ITEM_WIDTH) / 2.0, 
-                    y: (window_height as f32 - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF), 
-                    width: DEFAULT_MENU_ITEM_WIDTH, 
-                    height: DEFAULT_MENU_ITEM_HEIGHT,
-                },
-                content: *title,
-                color: Color::LIGHTGRAY,
-            });
+    fn construct_menu_items(menu_items: &[MenuAllItems], window_width: f32, window_height: f32) -> Vec<MenuItem> {
+        let mut menu_item: MenuItem;
+        let mut items: Vec<MenuItem> = Vec::with_capacity(menu_items.len());
+        let all_items_height: f32 = menu_items.len() as f32 * DEFAULT_MENU_ITEM_HEIGHT + (menu_items.len() - 1) as f32 * DEFAULT_MENU_ITEMS_DIFF;
+        
+        for (index, item) in menu_items.iter().enumerate() {
+            if item.description() == "" {
+                menu_item = MenuItem {
+                    btn: Rectangle {
+                        x: (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0, 
+                        y: (window_height - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF), 
+                        width: DEFAULT_MENU_ITEM_WIDTH, 
+                        height: DEFAULT_MENU_ITEM_HEIGHT,
+                    },
+                    title: *item,
+                    color: Color::LIGHTGRAY,
+                    description: None,
+                    description_pos: None
+                };
+            } else {
+                menu_item = MenuItem {
+                    btn: Rectangle {
+                        x: window_width / 8.0 * 7.0 - DEFAULT_MENU_ITEM_WIDTH, 
+                        y: (window_height - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF), 
+                        width: DEFAULT_MENU_ITEM_WIDTH, 
+                        height: DEFAULT_MENU_ITEM_HEIGHT,
+                    },
+                    title: *item,
+                    color: Color::LIGHTGRAY,
+                    description: Some(item.description().to_string()),
+                    description_pos: Some(Vector2 {
+                        x: window_width / 8.0,
+                        y: (window_height as f32 - all_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF) + (DEFAULT_MENU_ITEM_HEIGHT - DEFAULT_MENU_ITEM_FONT_SIZE) / 2.0,
+                    }),
+                };
+            }
+            items.push(menu_item);
         }
+
         items
     }
 
@@ -142,8 +177,20 @@ impl Menu {
         }
 
         for (index, item) in self.settings_items.iter_mut().enumerate() {
-            item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
             item.btn.y = (window_height - all_settings_items_height) / 2.0 + index as f32 * (DEFAULT_MENU_ITEM_HEIGHT + DEFAULT_MENU_ITEMS_DIFF);
+
+            match &item.description {
+                Some(..) => {
+                    item.btn.x = window_width / 8.0 * 7.0 - DEFAULT_MENU_ITEM_WIDTH;
+                    item.description_pos = Some(Vector2 {
+                        x: window_width / 8.0,
+                        y: item.btn.y + (DEFAULT_MENU_ITEM_HEIGHT - DEFAULT_MENU_ITEM_FONT_SIZE) / 2.0,
+                    });
+                },
+                _ => {
+                    item.btn.x = (window_width - DEFAULT_MENU_ITEM_WIDTH) / 2.0;
+                },
+            }
         }
     }
 
@@ -163,7 +210,7 @@ impl Menu {
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                            match item.content {
+                            match item.title {
                                 MenuAllItems::Start => {
                                     game.set_state(game::GameState::Game);
                                     level.start(game);
@@ -199,7 +246,7 @@ impl Menu {
                     if item.btn.check_collision_point_rec(mouse_pos) {
                         item.color = Color::LIGHTGREEN;
                         if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                            match item.content {
+                            match item.title {
                                 MenuAllItems::Difficulty => {
                                     game.change_difficulty(game.get_difficulty());
                                 },
@@ -226,50 +273,67 @@ impl Menu {
         }
     }
 
-    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, game: &game::Game, btn: &Rectangle, btn_text: &str, btn_color: &Color) {
-        d.draw_rectangle_rec(btn, btn_color);
-        let btn_text_sizes: Vector2 = game.get_font().measure_text(btn_text, DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing());
-        let btn_padding: Vector2 = Vector2 {
-            x: btn.x + (btn.width - btn_text_sizes.x) / 2.0, 
-            y: btn.y + (btn.height - btn_text_sizes.y) / 2.0
+    fn draw_menu_button(&self, d: &mut RaylibDrawHandle, game: &game::Game, menu_item: &MenuItem) {
+        // Draw item button
+        let game_difficulty: game::GameDifficulty = game.get_difficulty();
+        let item_btn_title: &str = match &menu_item.title {
+            MenuAllItems::Difficulty => game_difficulty.repr(),
+            MenuAllItems::Fullscreen => if game.get_settings().is_fullscreen { "Disable" } else { "Enable" },
+            MenuAllItems::ToggleFPS => if game.get_settings().is_fps_visible { "Disable" } else { "Enable" },
+            _ => menu_item.title.value(),
         };
-        d.draw_text_ex(game.get_font(), btn_text, btn_padding, DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing(), Color::BLACK);
+
+        d.draw_rectangle_rec(menu_item.btn, menu_item.color);
+        let btn_text_sizes: Vector2 = game.get_font().measure_text(item_btn_title, DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing());
+        let btn_padding: Vector2 = Vector2 {
+            x: menu_item.btn.x + (menu_item.btn.width - btn_text_sizes.x) / 2.0, 
+            y: menu_item.btn.y + (menu_item.btn.height - btn_text_sizes.y) / 2.0
+        };
+        d.draw_text_ex(game.get_font(), item_btn_title, btn_padding, DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing(), Color::BLACK);
+        
+        // Draw item description
+        match &menu_item.description {
+            Some(desc) => d.draw_text_ex(game.get_font(), desc.as_str(), menu_item.description_pos.unwrap(), DEFAULT_MENU_ITEM_FONT_SIZE, game.get_font_spacing(), Color::BLACK),
+            _ => {},
+        }
+    }
+
+    fn draw_help_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
+        let text_sizes: Vector2 = game.get_font().measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20.0, game.get_font_spacing());
+        let x: f32 = (game.get_window_width() - text_sizes.x) / 2.0;
+        let mut y: f32 = (game.get_window_height() - (100.0 + 64.0 * 3.0 + 36.0 * 4.0 + 32.0)) / 2.0;
+
+        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
+        y += 64.0;
+        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
+        y += 36.0;
+        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
+        y += 36.0;
+        d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
+        y += 64.0;
+        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
+        y += 64.0;
+        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
+        y += 36.0;
+        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
+        y += 36.0;
+        d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
+        y += 100.0;
+        d.draw_text_ex(game.get_font(), HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
     }
 
     fn draw_menu(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         if game.get_state() == game::GameState::Menu {
             if self.state == MenuState::Primary {
                 for item in self.items.iter() {
-                    self.draw_menu_button(d, &game, &item.btn, item.content.value(), &item.color);
+                    self.draw_menu_button(d, &game, &item);
                 }
             } else if self.state == MenuState::Settings {
                 for item in self.settings_items.iter() {
-                    self.draw_menu_button(d, &game, &item.btn, item.content.value(), &item.color);
+                    self.draw_menu_button(d, &game, &item);
                 }
-                let game_difficulty_text: String = format!("Your current game difficulty is: {}", game.get_difficulty());
-                draw_text_center(d, game_difficulty_text.as_str(), game.get_window_height() - 60.0, 40.0, Color::GREEN, &game)
             } else if self.state == MenuState::Help {
-                let text_sizes: Vector2 = game.get_font().measure_text(HELP_HOW_TO_PLAY_TEXT_3, 20.0, game.get_font_spacing());
-                let x: f32 = (game.get_window_width() - text_sizes.x) / 2.0;
-                let mut y: f32 = (game.get_window_height() - (100.0 + 64.0 * 3.0 + 36.0 * 4.0 + 32.0)) / 2.0;
-
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
-                y += 64.0;
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-                y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-                y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_HOW_TO_PLAY_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-                y += 64.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
-                y += 64.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_1, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-                y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_2, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-                y += 36.0;
-                d.draw_text_ex(game.get_font(), HELP_TIPS_TEXT_3, Vector2 {x: x, y: y}, 24.0, game.get_font_spacing(), Color::BLACK);
-                y += 100.0;
-                d.draw_text_ex(game.get_font(), HELP_BACK_TEXT, Vector2 {x: x, y: y}, 32.0, game.get_font_spacing(), Color::BLACK);
+                self.draw_help_menu(d, game);
             }
         }
     }
