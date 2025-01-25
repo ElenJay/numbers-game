@@ -324,7 +324,7 @@ impl Menu {
                 game.set_locale(&locale_code);
                 item.color = Color::LIGHTGREEN;
                 if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
-                    game.update_locale();
+                    game.update_config_file();
 
                     for locale in game.get_all_locales_mut() {
                         locale.unload_texture(rl, thread);

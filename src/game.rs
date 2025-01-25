@@ -80,44 +80,50 @@ impl Game {
     pub const SAVE_CONFIG_PATH: &str = "saves/save.cfg";
 
     pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread, mode: GameMode) -> Self {
+        let mut curr_locale_index: usize = 0;
+        let mut game_difficulty_int: i32 = 0;
+
         let english_alphabet: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         let cyrillic_alphabet: &str = "абвгдеєжзиіїйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
         let ascii_symbols: &str = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
         let alphabet: String = format!("{}{}{}", ascii_symbols, english_alphabet, cyrillic_alphabet);
         let mut has_to_load_locale_textures: bool = false;
 
+        match File::open(Self::SAVE_CONFIG_PATH) {
+            Ok(file) => {
+                let reader = BufReader::new(file);
+
+                for line in reader.lines() {
+                    match line {
+                        Ok(x) => match x.split_once("=") {
+                            Some((param, value)) => {
+                                if param.starts_with("locale") {
+                                    curr_locale_index = value.trim().parse::<i32>().unwrap_or(0) as usize;
+                                } else if param.starts_with("difficulty") {
+                                    game_difficulty_int = value.trim().parse::<i32>().unwrap_or(0) as i32;
+                                }
+                            },
+                            None => {},
+                        },
+                        Err(_) => {},
+                    }
+                };
+            },
+            Err(_) => {
+                has_to_load_locale_textures = true;
+            },
+        }
+
         let mut obj: Self = Self {
             mode: mode,
             state: GameState::Menu,
-            difficulty: GameDifficulty::Easy,
-            all_locales: Locale::load("assets/locales/codes.xml").expect("Failed to load locales"),
-            curr_locale_index: match File::open(Self::SAVE_CONFIG_PATH) {
-                Ok(file) => {
-                    let mut locale_index: usize = 0;
-                    let reader = BufReader::new(file);
-
-                    for line in reader.lines() {
-                        match line {
-                            Ok(x) => match x.split_once("=") {
-                                Some((param, value)) => {
-                                    if param.starts_with("locale") {
-                                        locale_index = value.trim().parse::<i32>().unwrap_or(0) as usize;
-                                    }
-                                },
-                                None => {},
-                            },
-                            Err(_) => {},
-                        }
-                    };
-    
-                    locale_index
-                },
-                Err(_) => {
-                    has_to_load_locale_textures = true;
-
-                    0
-                },
+            difficulty: match game_difficulty_int {
+                x if x == GameDifficulty::Hard as i32 => GameDifficulty::Hard,
+                x if x == GameDifficulty::Medium as i32 => GameDifficulty::Medium,
+                _ => GameDifficulty::Easy,
             },
+            all_locales: Locale::load("assets/locales/codes.xml").expect("Failed to load locales"),
+            curr_locale_index: curr_locale_index,
             settings: GameSettings {
                 is_fullscreen: true,
                 is_vsync: true,
@@ -184,12 +190,12 @@ impl Game {
 
     pub fn change_locale(&mut self) {
         self.curr_locale_index = if self.curr_locale_index + 1 >= self.all_locales.len() { 0 } else { self.curr_locale_index + 1 };
-        self.update_locale();
+        self.update_config_file();
     }
 
-    pub fn update_locale(&self) {
-        // Update save config file
-        let data: String = format!("locale = {}", self.curr_locale_index);
+    pub fn update_config_file(&self) {
+        // Update config file
+        let data: String = format!("locale = {}\ndifficulty = {}", self.curr_locale_index, self.get_difficulty() as i32);
         std::fs::write(Self::SAVE_CONFIG_PATH, &data).expect("Unable to write save file");
     }
 
@@ -203,6 +209,7 @@ impl Game {
             GameDifficulty::Medium => self.difficulty = GameDifficulty::Hard,
             GameDifficulty::Hard => self.difficulty = GameDifficulty::Easy,
         }
+        self.update_config_file();
     }
 
     pub fn get_font(&self) -> &Font {
