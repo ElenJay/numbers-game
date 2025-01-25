@@ -357,7 +357,7 @@ impl Level {
     fn draw_after_game_buttons(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
         for btn in [&self.btn_after_game_try_again, &self.btn_after_game_exit].iter() {
             // Draw button
-            let btn_text_sizes: Vector2 = game.get_font().measure_text(btn.get_title().as_str(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
+            let btn_text_sizes: Vector2 = game.get_font().measure_text(game.get_locale().get(btn.get_title()).unwrap(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
             let btn_padding: Vector2 = Vector2 {
                 x: btn.get_rec().x + (btn.get_rec().width - btn_text_sizes.x) / 2.0, 
                 y: btn.get_rec().y + (btn.get_rec().height - btn_text_sizes.y) / 2.0
@@ -368,7 +368,7 @@ impl Level {
             } else {
                 d.draw_rectangle_rec(btn.get_rec(), btn.get_color());
             }
-            d.draw_text_ex(game.get_font(), btn.get_title().as_str(), btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
+            d.draw_text_ex(game.get_font(), game.get_locale().get(btn.get_title()).unwrap(), btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
         }
     }
 }

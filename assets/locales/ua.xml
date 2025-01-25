@@ -4,7 +4,7 @@
     <string name="easy_difficulty">Легко</string>
     <string name="medium_difficulty">Середня</string>
     <string name="hard_difficulty">Складно</string>
-    <string name="try_again_btn">Спробувати знову</string>
+    <string name="try_again_btn">Знову</string>
     <string name="exit_btn">Вийти</string>
     <string name="score_result_1">Ваш результат -</string>
     <string name="score_result_2">балів.</string>
