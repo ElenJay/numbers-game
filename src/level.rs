@@ -1,6 +1,7 @@
 use raylib::prelude::*;
 use raylib::consts::MouseButton::*;
 
+use crate::consts;
 use crate::game;
 use crate::timer;
 use crate::utils::{ generate_numbers_array, draw_text_center, Button };
@@ -14,8 +15,6 @@ const MIN_V_OPACITY: f32 = 20.0;
 const H_COUNT: i32 = 8;
 const V_COUNT: i32 = 7;
 
-const BTN_TRY_AGAIN_TEXT: &str = "Try Again";
-const BTN_EXIT_TEXT: &str = "Exit";
 const BTN_TEXT_FONTSIZE: f32 = 48.0;
 
 pub struct Level {
@@ -55,19 +54,19 @@ impl Level {
                 y: 80.0, 
                 width: 150.0, 
                 height: 60.0, 
-            }, BTN_EXIT_TEXT, Color::WHITE),
+            }, consts::EXIT_BTN_STRING_NAME, Color::WHITE),
             btn_after_game_try_again: Button::new(Rectangle {
                 x: window_width / 2.0 - 250.0, 
                 y: window_height - 100.0, 
                 width: 250.0, 
                 height: 60.0, 
-            }, BTN_TRY_AGAIN_TEXT, Color::WHITE),
+            }, consts::TRY_AGAIN_BTN_STRING_NAME, Color::WHITE),
             btn_after_game_exit: Button::new(Rectangle {
                 x: window_width / 2.0 + 50.0, 
                 y: window_height - 100.0, 
                 width: 150.0, 
                 height: 60.0, 
-            }, BTN_EXIT_TEXT, Color::WHITE),
+            }, consts::EXIT_BTN_STRING_NAME, Color::WHITE),
         };
 
         for v_index in 0..V_COUNT {
@@ -318,12 +317,14 @@ impl Level {
     }
 
     fn draw_score(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        let text: String = format!("Your score  -  {0} points.", self.score);
+        let text: String = format!("{} {} {}", 
+                                   game.get_locale().get(consts::SCORE_RESULT_1_STRING_NAME).unwrap(), self.score, 
+                                   game.get_locale().get(consts::SCORE_RESULT_2_STRING_NAME).unwrap());
         draw_text_center(d, text.as_str(), 24.0, 36.0, Color::GREEN, &game);
     }
 
     fn draw_game_exit_button(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        let btn_text_sizes: Vector2 = game.get_font().measure_text(BTN_EXIT_TEXT, BTN_TEXT_FONTSIZE, game.get_font_spacing());
+        let btn_text_sizes: Vector2 = game.get_font().measure_text(game.get_locale().get(consts::EXIT_BTN_STRING_NAME).unwrap(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
         let btn_padding: Vector2 = Vector2 {
             x: self.btn_game_exit.get_rec().x + (self.btn_game_exit.get_rec().width - btn_text_sizes.x) / 2.0, 
             y: self.btn_game_exit.get_rec().y + (self.btn_game_exit.get_rec().height - btn_text_sizes.y) / 2.0
@@ -334,17 +335,20 @@ impl Level {
         } else {
             d.draw_rectangle_rec(self.btn_game_exit.get_rec(), self.btn_game_exit.get_color());
         }
-        d.draw_text_ex(game.get_font(), BTN_EXIT_TEXT, btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
+        d.draw_text_ex(game.get_font(), game.get_locale().get(consts::EXIT_BTN_STRING_NAME).unwrap(), btn_padding, BTN_TEXT_FONTSIZE, game.get_font_spacing(), Color::BLACK);
     }
 
     fn draw_win(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        draw_text_center(d, "Congratulations. You win!!!", 30.0, 60.0, Color::GREEN, &game);
+        draw_text_center(d, game.get_locale().get(consts::WIN_RESULT_STRING_NAME).unwrap(), 30.0, 60.0, Color::GREEN, &game);
 
         self.draw_after_game_buttons(d, game);
     }
 
     fn draw_lose(&self, d: &mut RaylibDrawHandle, game: &game::Game) {
-        let lose_text: String = format!("Sorry. You lose with score: {0} points (and {1} fails).", self.score, self.fails);
+        let lose_text: String = format!("{} {} {} {} {}", 
+                                        game.get_locale().get(consts::LOSE_RESULT_1_STRING_NAME).unwrap(), self.score, 
+                                        game.get_locale().get(consts::LOSE_RESULT_2_STRING_NAME).unwrap(), self.fails, 
+                                        game.get_locale().get(consts::LOSE_RESULT_3_STRING_NAME).unwrap());
         draw_text_center(d, lose_text.as_str(), 30.0, 60.0, Color::RED, &game);
 
         self.draw_after_game_buttons(d, game);

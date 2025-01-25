@@ -2,9 +2,13 @@
 
 use raylib::prelude::*;
 use raylib::consts::KeyboardKey::*;
+use std::fs::File;
+use std::io::{prelude::*, BufReader};
 
+use crate::consts;
 use crate::menu::{ Menu, MenuState };
 use crate::level::Level;
+use crate::localization::Locale;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum GameMode {
@@ -36,9 +40,9 @@ impl std::fmt::Display for GameDifficulty {
 impl GameDifficulty {
     pub fn repr(&self) -> &str {
         match *self {
-            Self::Easy => "Easy",
-            Self::Medium => "Medium",
-            Self::Hard => "Hard",
+            Self::Easy => consts::EASY_DIFFICULTY_STRING_NAME,
+            Self::Medium => consts::MEDIUM_DIFFICULTY_STRING_NAME,
+            Self::Hard => consts::HARD_DIFFICULTY_STRING_NAME,
         }
     }
 }
@@ -59,6 +63,8 @@ pub struct Game {
     mode: GameMode,
     state: GameState,
     difficulty: GameDifficulty,
+    all_locales: Vec<Locale>,
+    curr_locale_index: usize,
     settings: GameSettings,
     game_font: GameFont,
     window_width: f32,
@@ -71,22 +77,47 @@ impl Game {
     pub const DEFAULT_WINDOW_WIDTH: i32 = 1600;
     pub const DEFAULT_WINDOW_HEIGHT: i32 = 900;
     pub const CUSTOM_FONT_PATH: &str = "assets/fonts/Arimo-Regular.ttf";
+    pub const SAVE_CONFIG_PATH: &str = "saves/save.cfg";
 
     pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread, mode: GameMode) -> Self {
         let english_alphabet: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        let cyrillic_alphabet: &str = "абвгдеєжзиіЇйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
+        let cyrillic_alphabet: &str = "абвгдеєжзиіїйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
         let ascii_symbols: &str = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
         let alphabet: String = format!("{}{}{}", ascii_symbols, english_alphabet, cyrillic_alphabet);
+        let mut has_to_load_locale_textures: bool = false;
 
-        let spacing: f32 = match std::fs::File::open(Self::CUSTOM_FONT_PATH) {
-            Ok(_) => 1.0,
-            Err(_) => 5.0,
-        };
-
-        Self {
+        let mut obj: Self = Self {
             mode: mode,
             state: GameState::Menu,
             difficulty: GameDifficulty::Easy,
+            all_locales: Locale::load("assets/locales/codes.xml").expect("Failed to load locales"),
+            curr_locale_index: match File::open(Self::SAVE_CONFIG_PATH) {
+                Ok(file) => {
+                    let mut locale_index: usize = 0;
+                    let reader = BufReader::new(file);
+
+                    for line in reader.lines() {
+                        match line {
+                            Ok(x) => match x.split_once("=") {
+                                Some((param, value)) => {
+                                    if param.starts_with("locale") {
+                                        locale_index = value.trim().parse::<i32>().unwrap_or(0) as usize;
+                                    }
+                                },
+                                None => {},
+                            },
+                            Err(_) => {},
+                        }
+                    };
+    
+                    locale_index
+                },
+                Err(_) => {
+                    has_to_load_locale_textures = true;
+
+                    0
+                },
+            },
             settings: GameSettings {
                 is_fullscreen: true,
                 is_vsync: true,
@@ -94,13 +125,25 @@ impl Game {
             },
             game_font: GameFont {
                 font: rl.load_font_ex(&thread, Self::CUSTOM_FONT_PATH, 200, Some(alphabet.as_str())).unwrap(), 
-                spacing: spacing 
+                spacing: match File::open(Self::CUSTOM_FONT_PATH) {
+                    Ok(_) => 1.0,
+                    Err(_) => 5.0,
+                }, 
             },
             window_width: Self::DEFAULT_WINDOW_WIDTH as f32,
             window_height: Self::DEFAULT_WINDOW_HEIGHT as f32,
             fullscreen_width: 0,
             fullscreen_height: 0,
+        };
+
+        rl.set_window_title(thread, obj.get_locale().get(consts::GAME_TITLE_STRING_NAME).unwrap());
+        if has_to_load_locale_textures {
+            for locale in obj.all_locales.iter_mut() {
+                locale.load_texture(rl, thread);
+            }
         }
+
+        obj
     }
 
     pub fn get_mode(&self) -> GameMode {
@@ -117,6 +160,37 @@ impl Game {
 
     pub fn get_difficulty(&self) -> GameDifficulty {
         self.difficulty
+    }
+
+    pub fn get_all_locales(&self) -> &Vec<Locale> {
+        &self.all_locales
+    }
+
+    pub fn get_all_locales_mut(&mut self) -> &mut Vec<Locale> {
+        &mut self.all_locales
+    }
+
+    pub fn get_locale(&self) -> &Locale {
+        self.all_locales.get(self.curr_locale_index).unwrap()
+    }
+
+    pub fn set_locale(&mut self, code: &str) {
+        for (index, locale) in self.all_locales.iter().enumerate() {
+            if locale.get_code() == code {
+                self.curr_locale_index = index;
+            }
+        }
+    }
+
+    pub fn change_locale(&mut self) {
+        self.curr_locale_index = if self.curr_locale_index + 1 >= self.all_locales.len() { 0 } else { self.curr_locale_index + 1 };
+        self.update_locale();
+    }
+
+    pub fn update_locale(&self) {
+        // Update save config file
+        let data: String = format!("locale = {}", self.curr_locale_index);
+        std::fs::write(Self::SAVE_CONFIG_PATH, &data).expect("Unable to write save file");
     }
 
     pub fn get_settings(&self) -> &GameSettings {

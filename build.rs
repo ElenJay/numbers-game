@@ -7,7 +7,7 @@ use std::{
     }, 
 };
 
-const COPY_DIR: &str = "assets";
+const COPY_DIRS: [&str; 2] = ["assets", "saves"];
 
 fn copy_dir<P, Q>(from: P, to: Q) where P: AsRef<Path>, Q: AsRef<Path> {
     let to: PathBuf = to.as_ref().to_path_buf();
@@ -28,11 +28,13 @@ fn copy_dir<P, Q>(from: P, to: Q) where P: AsRef<Path>, Q: AsRef<Path> {
 }
 
 fn main() {
-    let out  = PathBuf::from(format!("target/{}/{}", env::var("PROFILE").unwrap(), COPY_DIR));
+    for directory in COPY_DIRS {
+        let out  = PathBuf::from(format!("target/{}/{}", env::var("PROFILE").unwrap(), directory));
 
-    if out.exists() {
-        fs::remove_dir_all(&out).unwrap();
+        if out.exists() {
+            fs::remove_dir_all(&out).unwrap();
+        }
+        fs::create_dir(&out).unwrap();
+        copy_dir(directory, &out);
     }
-    fs::create_dir(&out).unwrap();
-    copy_dir(COPY_DIR, &out);
 }

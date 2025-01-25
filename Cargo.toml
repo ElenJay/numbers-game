@@ -20,6 +20,7 @@ osx_url_schemes = ["com.elenjay.numbersprintapp"]
 [dependencies]
 raylib = "5.0.2"
 rand = "0.8.5"
+quick-xml = "0.37.2"
 
 [dev-dependencies]
 cargo-bundle = "0.6.1"

@@ -1,0 +1,36 @@
+<localization>
+    <string name="game_title">Числа</string>
+    <string name="choose_language">Оберіть мову (та натисніть):</string>
+    <string name="easy_difficulty">Легко</string>
+    <string name="medium_difficulty">Середня</string>
+    <string name="hard_difficulty">Складно</string>
+    <string name="try_again_btn">Спробувати знову</string>
+    <string name="exit_btn">Вийти</string>
+    <string name="score_result_1">Ваш результат -</string>
+    <string name="score_result_2">балів.</string>
+    <string name="win_result">Вітання. Ви перемогли!!!</string>
+    <string name="lose_result_1">Ви програли з результатом:</string>
+    <string name="lose_result_2">балів (та</string>
+    <string name="lose_result_3">помилок).</string>
+    <string name="enable_btn">Дозволити</string>
+    <string name="disable_btn">Вимкнути</string>
+    <string name="start_menu">Почати</string>
+    <string name="continue_menu">Продовжити</string>
+    <string name="settings_menu">Налаштування</string>
+    <string name="help_menu">Допомога</string>
+    <string name="exit_menu">Вийти</string>
+    <string name="back_menu">Назад</string>
+    <string name="difficulty_menu">Складність гри</string>
+    <string name="language_menu">Мова</string>
+    <string name="fullscreen_menu">Повноекранний режим</string>
+    <string name="toggle_fps_menu">Лічильник к-сті кадрів на екрані</string>
+    <string name="help_title_1">Як грати:</string>
+    <string name="help_text_1">1. Натискайте на числа від 1 до 56 у зростаючому порядку якомога швидше.</string>
+    <string name="help_text_2">2. Час іде! Гра завершується, коли таймер закінчується.</string>
+    <string name="help_text_3">3. Намагайтеся отримати найвищу кількість балів: ваш результат залежить від кількості правильно обраних чисел протягом гри.</string>
+    <string name="help_title_2">Поради:</string>
+    <string name="help_text_4">- Будьте зосереджені! Слідкуйте за числами та швидко натискайте.</string>
+    <string name="help_text_5">- Досконалість потребує практики! Чим більше ви граєте, тим швидше ви досягнете перемоги.</string>
+    <string name="help_text_6">- Приємної вам гри!</string>
+    <string name="help_title_3">Натисніть кнопку Esc щоб вернутися в головне меню...</string>
+</localization>

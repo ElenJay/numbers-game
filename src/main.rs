@@ -4,11 +4,13 @@ use raylib::prelude::*;
 use raylib::core::texture::Image;
 use std::env;
 
+mod consts;
 mod game;
-mod menu;
 mod level;
-mod utils;
+mod localization;
+mod menu;
 mod timer;
+mod utils;
 
 use game::Game;
 use menu::Menu;
@@ -18,8 +20,6 @@ fn main() {
     // Init window
     let (mut rl, thread) = raylib::init()
         .size(Game::DEFAULT_WINDOW_WIDTH, Game::DEFAULT_WINDOW_HEIGHT)
-        .title("Numbers Game")
-        // .resizable()
         .vsync()
         .build();
 
@@ -38,7 +38,7 @@ fn main() {
     while !rl.window_should_close() {
         // Processing controllers
         game.process_controller(&mut rl, &mut menu, &mut level);
-        menu.process_controller(&mut rl, &mut game, &mut level);
+        menu.process_controller(&mut rl, &thread, &mut game, &mut level);
         level.process_controller(&rl, &mut game);
 
         // Drawing

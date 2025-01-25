@@ -1,0 +1,36 @@
+<localization>
+    <string name="game_title">Numbers</string>
+    <string name="choose_language">Choose language (click on it):</string>
+    <string name="easy_difficulty">Easy</string>
+    <string name="medium_difficulty">Medium</string>
+    <string name="hard_difficulty">Hard</string>
+    <string name="try_again_btn">Try Again</string>
+    <string name="exit_btn">Exit</string>
+    <string name="score_result_1">Your score -</string>
+    <string name="score_result_2">points.</string>
+    <string name="win_result">Congratulations. You win!!!</string>
+    <string name="lose_result_1">Sorry. You lose with score:</string>
+    <string name="lose_result_2">points (and</string>
+    <string name="lose_result_3">fails).</string>
+    <string name="enable_btn">Enable</string>
+    <string name="disable_btn">Disable</string>
+    <string name="start_menu">Start</string>
+    <string name="continue_menu">Continue</string>
+    <string name="settings_menu">Settings</string>
+    <string name="help_menu">Help</string>
+    <string name="exit_menu">Exit</string>
+    <string name="back_menu">Back</string>
+    <string name="difficulty_menu">Game difficulty</string>
+    <string name="language_menu">Language</string>
+    <string name="fullscreen_menu">Fullscreen mode</string>
+    <string name="toggle_fps_menu">FPS counter on the screen</string>
+    <string name="help_title_1">How to Play:</string>
+    <string name="help_text_1">1. Click the numbers from 1 to 56 in order as fast as you can.</string>
+    <string name="help_text_2">2. Time's ticking! The game ends when the timer runs out.</string>
+    <string name="help_text_3">3. Aim for the highest score: Your score is based on the amount of numbers you clicked correctly within the time limit.</string>
+    <string name="help_title_2">Tips:</string>
+    <string name="help_text_4">- Stay focused! Keep your eyes on the numbers and click quickly.</string>
+    <string name="help_text_5">- Practice makes perfect! The more you play, the faster you'll get.</string>
+    <string name="help_text_6">- Have fun! This is a challenging and addictive game.</string>
+    <string name="help_title_3">Press Esc button to go back to the menu...</string>
+</localization>
