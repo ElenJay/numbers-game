@@ -237,23 +237,41 @@ impl Level {
                 self.buttons[index].y = v_index as f32 * (RECTANGLE_HEIGHT + v_opacity) + (window_height - V_COUNT as f32 * (RECTANGLE_HEIGHT + v_opacity) + v_opacity) / 2.0;
             }
         }
+    }
 
+    pub fn update_menu_btn_positions(&mut self, game: &game::Game) {
+        let mut btn_text_sizes: Vector2;
+        let window_width: f32 = game.get_window_width();
+        let window_height: f32 = game.get_window_height();
+        let default_btn_width_padding: f32 = 30.0;
+
+        btn_text_sizes = game.get_font().measure_text(
+            game.get_locale().get(self.btn_game_exit.get_title()
+        ).unwrap(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
         self.btn_game_exit.set_rec(Rectangle {
-            x: window_width - 150.0 - 10.0, 
+            x: window_width - 10.0 - btn_text_sizes.x - default_btn_width_padding, 
             y: 80.0, 
-            width: 150.0, 
+            width: btn_text_sizes.x + default_btn_width_padding, 
             height: 60.0, 
         });
+
+        btn_text_sizes = game.get_font().measure_text(
+            game.get_locale().get(self.btn_after_game_try_again.get_title()
+        ).unwrap(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
         self.btn_after_game_try_again.set_rec(Rectangle {
-            x: window_width / 2.0 - 250.0, 
+            x: window_width / 2.0 - btn_text_sizes.x - default_btn_width_padding, 
             y: window_height - 100.0, 
-            width: 250.0, 
+            width: btn_text_sizes.x + default_btn_width_padding, 
             height: 60.0, 
         });
+
+        btn_text_sizes = game.get_font().measure_text(
+            game.get_locale().get(self.btn_after_game_exit.get_title()
+        ).unwrap(), BTN_TEXT_FONTSIZE, game.get_font_spacing());
         self.btn_after_game_exit.set_rec(Rectangle {
             x: window_width / 2.0 + 50.0, 
             y: window_height - 100.0, 
-            width: 150.0, 
+            width: btn_text_sizes.x + default_btn_width_padding, 
             height: 60.0, 
         });
     }

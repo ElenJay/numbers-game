@@ -180,17 +180,19 @@ impl Game {
         self.all_locales.get(self.curr_locale_index).unwrap()
     }
 
-    pub fn set_locale(&mut self, code: &str) {
+    pub fn set_locale(&mut self, code: &str, level: &mut Level) {
         for (index, locale) in self.all_locales.iter().enumerate() {
             if locale.get_code() == code {
                 self.curr_locale_index = index;
             }
         }
+        level.update_menu_btn_positions(self);
     }
 
-    pub fn change_locale(&mut self) {
+    pub fn change_locale(&mut self, level: &mut Level) {
         self.curr_locale_index = if self.curr_locale_index + 1 >= self.all_locales.len() { 0 } else { self.curr_locale_index + 1 };
         self.update_config_file();
+        level.update_menu_btn_positions(self);
     }
 
     pub fn update_config_file(&self) {
@@ -270,6 +272,7 @@ impl Game {
             self.set_window_sizes(rl.get_screen_width(), rl.get_screen_height());
             menu.update_btn_positions(self);
             level.update_btn_positions(self);
+            level.update_menu_btn_positions(self);
         }
 
         if rl.is_key_released(KEY_F1) {

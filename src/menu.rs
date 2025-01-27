@@ -236,7 +236,7 @@ impl Menu {
         } else if self.state == MenuState::Settings {
             self.process_settings_menu_controller(rl, &mouse_pos, game, level);
         } else if self.state == MenuState::LanguageSelect {
-            self.process_language_selector_controller(rl, thread, &mouse_pos, game);
+            self.process_language_selector_controller(rl, thread, &mouse_pos, game, level);
         }
     }
 
@@ -302,7 +302,7 @@ impl Menu {
                 if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                     match item.title {
                         MenuAllItems::Difficulty => game.change_difficulty(game.get_difficulty()),
-                        MenuAllItems::Language => game.change_locale(),
+                        MenuAllItems::Language => game.change_locale(level),
                         MenuAllItems::Fullscreen => is_fullscreen_required = true,
                         MenuAllItems::ToggleFPS => game.toggle_fps_monitor(),
                         MenuAllItems::Back => self.state = MenuState::Primary,
@@ -318,11 +318,11 @@ impl Menu {
         }
     }
 
-    fn process_language_selector_controller(&mut self, rl: &mut RaylibHandle, thread: &RaylibThread, mouse_pos: &Vector2, game: &mut game::Game) {
+    fn process_language_selector_controller(&mut self, rl: &mut RaylibHandle, thread: &RaylibThread, mouse_pos: &Vector2, game: &mut game::Game, level: &mut level::Level) {
         for (index, item) in self.locale_items.iter_mut().enumerate() {
             if item.btn.check_collision_point_rec(mouse_pos) {
                 let locale_code: String = game.get_all_locales()[index].get_code().clone();
-                game.set_locale(&locale_code);
+                game.set_locale(&locale_code, level);
                 item.color = Color::LIGHTGREEN;
                 if rl.is_mouse_button_released(MOUSE_BUTTON_LEFT) {
                     game.update_config_file();
