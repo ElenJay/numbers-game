@@ -27,7 +27,8 @@
     <string name="help_title_1">How to Play:</string>
     <string name="help_text_1">1. Click the numbers from 1 to 56 in order as fast as you can.</string>
     <string name="help_text_2">2. Time's ticking! The game ends when the timer runs out.</string>
-    <string name="help_text_3">3. Aim for the highest score: Your score is based on the amount of numbers you clicked correctly within the time limit.</string>
+    <string name="help_text_3_1">3. Aim for the highest score.</string>
+    <string name="help_text_3_2">Your score is based on the amount of numbers you clicked correctly within the time limit.</string>
     <string name="help_title_2">Tips:</string>
     <string name="help_text_4">- Stay focused! Keep your eyes on the numbers and click quickly.</string>
     <string name="help_text_5">- Practice makes perfect! The more you play, the faster you'll get.</string>

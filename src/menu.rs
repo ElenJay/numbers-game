@@ -17,11 +17,12 @@ struct HelpTextRow {
     padding_bottom: u16,
 }
 
-const HELP_TEXT_ROWS: [HelpTextRow; 9] = [
+const HELP_TEXT_ROWS: [HelpTextRow; 10] = [
     HelpTextRow { font_size: 32, padding_bottom: 64, content: consts::HELP_TITLE_1_STRING_NAME, },
     HelpTextRow { font_size: 24, padding_bottom: 36, content: consts::HELP_TEXT_1_STRING_NAME, },
     HelpTextRow { font_size: 24, padding_bottom: 36, content: consts::HELP_TEXT_2_STRING_NAME, },
-    HelpTextRow { font_size: 24, padding_bottom: 64, content: consts::HELP_TEXT_3_STRING_NAME, },
+    HelpTextRow { font_size: 24, padding_bottom: 50, content: consts::HELP_TEXT_3_1_STRING_NAME, },
+    HelpTextRow { font_size: 24, padding_bottom: 64, content: consts::HELP_TEXT_3_2_STRING_NAME, },
     HelpTextRow { font_size: 32, padding_bottom: 64, content: consts::HELP_TITLE_2_STRING_NAME, },
     HelpTextRow { font_size: 24, padding_bottom: 36, content: consts::HELP_TEXT_4_STRING_NAME, },
     HelpTextRow { font_size: 24, padding_bottom: 36, content: consts::HELP_TEXT_5_STRING_NAME, },

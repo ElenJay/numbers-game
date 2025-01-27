@@ -1,0 +1,37 @@
+<localization>
+    <string name="game_title">Nummern</string>
+    <string name="choose_language">Sprache auswählen (anklicken):</string>
+    <string name="easy_difficulty">Einfach</string>
+    <string name="medium_difficulty">Medium</string>
+    <string name="hard_difficulty">Hart</string>
+    <string name="try_again_btn">Wieder</string>
+    <string name="exit_btn">Ausfahrt</string>
+    <string name="score_result_1">Punktestand -</string>
+    <string name="score_result_2">Punkte.</string>
+    <string name="win_result">Herzlichen Glückwunsch. Du hast gewonnen!!!</string>
+    <string name="lose_result_1">Tut mir leid. Sie verlieren mit Punktzahl:</string>
+    <string name="lose_result_2">Punkte (und</string>
+    <string name="lose_result_3">Fehler).</string>
+    <string name="enable_btn">Aktivieren</string>
+    <string name="disable_btn">Deaktivieren</string>
+    <string name="start_menu">Start</string>
+    <string name="continue_menu">Weitermachen</string>
+    <string name="settings_menu">Einstellungen</string>
+    <string name="help_menu">Helfen</string>
+    <string name="exit_menu">Ausfahrt</string>
+    <string name="back_menu">Zurück</string>
+    <string name="difficulty_menu">Spielschwierigkeit</string>
+    <string name="language_menu">Sprache</string>
+    <string name="fullscreen_menu">Vollbildmodus</string>
+    <string name="toggle_fps_menu">FPS-Zähler auf dem Bildschirm</string>
+    <string name="help_title_1">Spielanleitung:</string>
+    <string name="help_text_1">1. Klicken Sie der Reihe nach so schnell wie möglich auf die Zahlen von 1 bis 56.</string>
+    <string name="help_text_2">2. Die Zeit läuft! Das Spiel endet, wenn der Timer abgelaufen ist.</string>
+    <string name="help_text_3_1">3. Streben Sie nach der höchsten Punktzahl.</string>
+    <string name="help_text_3_2">Punktestand richtet sich nach der Anzahl der Zahlen, die Sie innerhalb des Zeitlimits richtig angeklickt haben.</string>
+    <string name="help_title_2">Tipps:</string>
+    <string name="help_text_4">- Bleiben Sie konzentriert! Behalten Sie die Zahlen im Auge und klicken Sie schnell.</string>
+    <string name="help_text_5">- Übung macht den Meister! Je mehr Sie spielen, desto schneller werden Sie.</string>
+    <string name="help_text_6">- Viel Spaß! Dies ist ein herausforderndes und süchtig machendes Spiel.</string>
+    <string name="help_title_3">Drücken Sie die Esc-Taste, um zum Menü zurückzukehren...</string>
+</localization>

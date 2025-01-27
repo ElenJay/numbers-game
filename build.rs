@@ -7,7 +7,7 @@ use std::{
     }, 
 };
 
-const COPY_DIRS: [&str; 2] = ["assets", "saves"];
+const COPY_DIRS: [&str; 1] = ["assets"];
 
 fn copy_dir<P, Q>(from: P, to: Q) where P: AsRef<Path>, Q: AsRef<Path> {
     let to: PathBuf = to.as_ref().to_path_buf();

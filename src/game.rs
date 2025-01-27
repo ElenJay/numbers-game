@@ -77,15 +77,15 @@ impl Game {
     pub const DEFAULT_WINDOW_WIDTH: i32 = 1600;
     pub const DEFAULT_WINDOW_HEIGHT: i32 = 900;
     pub const CUSTOM_FONT_PATH: &str = "assets/fonts/Arimo-Regular.ttf";
-    pub const SAVE_CONFIG_PATH: &str = "saves/save.cfg";
+    pub const SAVE_CONFIG_PATH: &str = "game.cfg";
 
     pub fn new(rl: &mut RaylibHandle, thread: &RaylibThread, mode: GameMode) -> Self {
         let mut curr_locale_index: usize = 0;
         let mut game_difficulty_int: i32 = 0;
 
-        let english_alphabet: &str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let english_alphabet: &str = "abcdefghijklmnopqrstuvwxyzäöüßABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜẞ";
         let cyrillic_alphabet: &str = "абвгдеєжзиіїйклмнопрстуфхцчшщьюяАБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ";
-        let ascii_symbols: &str = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/?`~";
+        let ascii_symbols: &str = "1234567890 !@#$%^&*()_+-=[]{};':\",.<>/\\?`~";
         let alphabet: String = format!("{}{}{}", ascii_symbols, english_alphabet, cyrillic_alphabet);
         let mut has_to_load_locale_textures: bool = false;
 
